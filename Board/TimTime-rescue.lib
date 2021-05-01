@@ -1,0 +1,134 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# 7P-25.000MBP-T-7P-25.000MBP-T-MiniSlate-rescue
+#
+DEF 7P-25.000MBP-T-7P-25.000MBP-T-MiniSlate-rescue Y 0 30 Y Y 1 F N
+F0 "Y" 1350 300 50 H V L CNN
+F1 "7P-25.000MBP-T-7P-25.000MBP-T-MiniSlate-rescue" 1350 200 50 H V L CNN
+F2 "7P25000MBPT" 1350 100 50 H I L CNN
+F3 "https://www.mouser.cn/datasheet/2/417/7P-552878.pdf" 1350 0 50 H I L CNN
+F4 "Standard Clock Oscillators 25MHz 3.3Volt .28ppm -40C +85C" 1350 -100 50 H I L CNN "Description"
+F5 "1.5" 1350 -200 50 H I L CNN "Height"
+F6 "TXC" 1350 -300 50 H I L CNN "Manufacturer_Name"
+F7 "7P-25.000MBP-T" 1350 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "717-7P-25.000MBP-T" 1350 -700 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.com/Search/Refine.aspx?Keyword=717-7P-25.000MBP-T" 1350 -800 50 H I L CNN "Mouser Price/Stock"
+DRAW
+P 5 0 1 6 200 100 1300 100 1300 -200 200 -200 200 100 N
+X AFC_OR_GND 1 0 -100 200 R 50 50 0 0 P
+X GND 3 1500 -100 200 L 50 50 0 0 P
+X OUTPUT 4 1500 0 200 L 50 50 0 0 P
+X VCC 6 0 0 200 R 50 50 0 0 P
+ENDDRAW
+ENDDEF
+#
+# LD56100DPU33R-LD56100DPU33R-MiniSlate-rescue
+#
+DEF LD56100DPU33R-LD56100DPU33R-MiniSlate-rescue IC 0 30 Y Y 1 F N
+F0 "IC" 1150 300 50 H V L CNN
+F1 "LD56100DPU33R-LD56100DPU33R-MiniSlate-rescue" 1150 200 50 H V L CNN
+F2 "LD56100DPU33R" 1150 100 50 H I L CNN
+F3 "https://componentsearchengine.com/Datasheets/1/LD56100DPU33R.pdf" 1150 0 50 H I L CNN
+F4 "LDO Voltage Regulators 1A very low dropout fast transient ultra-low noise linear regulator" 1150 -100 50 H I L CNN "Description"
+F5 "1" 1150 -200 50 H I L CNN "Height"
+F6 "STMicroelectronics" 1150 -300 50 H I L CNN "Manufacturer_Name"
+F7 "LD56100DPU33R" 1150 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "LD56100DPU33R" 1150 -500 50 H I L CNN "Arrow Part Number"
+F9 "https://www.arrow.com/en/products/ld56100dpu33r/stmicroelectronics" 1150 -600 50 H I L CNN "Arrow Price/Stock"
+F10 "511-LD56100DPU33R" 1150 -700 50 H I L CNN "Mouser Part Number"
+F11 "https://www.mouser.co.uk/ProductDetail/STMicroelectronics/LD56100DPU33R?qs=lYGu3FyN48ervycZizbDLw%3D%3D" 1150 -800 50 H I L CNN "Mouser Price/Stock"
+DRAW
+P 5 0 1 6 200 100 1100 100 1100 -500 200 -500 200 100 N
+X VOUT_1 1 0 0 200 R 50 50 0 0 P
+X VOUT_2 2 0 -100 200 R 50 50 0 0 P
+X LCON 3 0 -200 200 R 50 50 0 0 P
+X FB 4 0 -300 200 R 50 50 0 0 P
+X GND_1 5 0 -400 200 R 50 50 0 0 P
+X EN 6 1300 0 200 L 50 50 0 0 P
+X VIN_1 7 1300 -100 200 L 50 50 0 0 P
+X VIN_2 8 1300 -200 200 L 50 50 0 0 P
+X GND_2 9 1300 -300 200 L 50 50 0 0 P
+ENDDRAW
+ENDDEF
+#
+# MCP73834-CNI_MF-MCP73834-CNI_MF-MiniSlate-rescue
+#
+DEF MCP73834-CNI_MF-MCP73834-CNI_MF-MiniSlate-rescue IC 0 30 Y Y 1 F N
+F0 "IC" 1250 300 50 H V L CNN
+F1 "MCP73834-CNI_MF-MCP73834-CNI_MF-MiniSlate-rescue" 1250 200 50 H V L CNN
+F2 "SON50P300X300X100-11N-D" 1250 100 50 H I L CNN
+F3 "http://www.microchip.com/mymicrochip/filehandler.aspx?ddocname=en027983" 1250 0 50 H I L CNN
+F4 "Battery Management Charge Management Controllers" 1250 -100 50 H I L CNN "Description"
+F5 "1" 1250 -200 50 H I L CNN "Height"
+F6 "Microchip" 1250 -300 50 H I L CNN "Manufacturer_Name"
+F7 "MCP73834-CNI/MF" 1250 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "MCP73834-CNI/MF" 1250 -500 50 H I L CNN "Arrow Part Number"
+F9 "https://www.arrow.com/en/products/mcp73834-cnimf/microchip-technology" 1250 -600 50 H I L CNN "Arrow Price/Stock"
+F10 "579-MCP73834-CNI/MF" 1250 -700 50 H I L CNN "Mouser Part Number"
+F11 "https://www.mouser.co.uk/ProductDetail/Microchip-Technology/MCP73834-CNI-MF?qs=jZi1jxfVU94PSM0QV%2FY0BQ%3D%3D" 1250 -800 50 H I L CNN "Mouser Price/Stock"
+DRAW
+P 5 0 1 6 200 100 1200 100 1200 -800 200 -800 200 100 N
+X VDD_1 1 0 0 200 R 50 50 0 0 P
+X VBAT_2 10 1400 0 200 L 50 50 0 0 P
+X GND 11 700 -1000 200 U 50 50 0 0 P
+X VDD_2 2 0 -100 200 R 50 50 0 0 P
+X STAT1 3 0 -200 200 R 50 50 0 0 P
+X STAT2 4 0 -300 200 R 50 50 0 0 P
+X VSS 5 0 -400 200 R 50 50 0 0 P
+X PROG 6 1400 -400 200 L 50 50 0 0 P
+X ~PG(TE) 7 1400 -300 200 L 50 50 0 0 P
+X THERM 8 1400 -200 200 L 50 50 0 0 P
+X VBAT_1 9 1400 -100 200 L 50 50 0 0 P
+ENDDRAW
+ENDDEF
+#
+# UJ31-CH-G2-SMT-TR-UJ31-CH-G2-SMT-TR-MiniSlate-rescue
+#
+DEF UJ31-CH-G2-SMT-TR-UJ31-CH-G2-SMT-TR-MiniSlate-rescue J 0 30 Y Y 1 F N
+F0 "J" 1250 300 50 H V L CNN
+F1 "UJ31-CH-G2-SMT-TR-UJ31-CH-G2-SMT-TR-MiniSlate-rescue" 1250 200 50 H V L CNN
+F2 "UJ31CHG2SMTTR" 1250 100 50 H I L CNN
+F3 "https://www.arrow.com/en/products/uj31-ch-g2-smt-tr/cui-devices" 1250 0 50 H I L CNN
+F4 "USB Connectors USB jack 3.1 C type 24pin Horz SMT" 1250 -100 50 H I L CNN "Description"
+F5 "4.66" 1250 -200 50 H I L CNN "Height"
+F6 "CUI Devices" 1250 -300 50 H I L CNN "Manufacturer_Name"
+F7 "UJ31-CH-G2-SMT-TR" 1250 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "UJ31-CH-G2-SMT-TR" 1250 -500 50 H I L CNN "Arrow Part Number"
+F9 "https://www.arrow.com/en/products/uj31-ch-g2-smt-tr/cui-devices" 1250 -600 50 H I L CNN "Arrow Price/Stock"
+F10 "490-UJ31-CH-G2SMT-TR" 1250 -700 50 H I L CNN "Mouser Part Number"
+F11 "https://www.mouser.co.uk/ProductDetail/CUI-Devices/UJ31-CH-G2-SMT-TR?qs=W0yvOO0ixfGEsh2EYrPgIQ%3D%3D" 1250 -800 50 H I L CNN "Mouser Price/Stock"
+DRAW
+P 5 0 1 6 200 100 1200 100 1200 -1400 200 -1400 200 100 N
+X GND_1 A1 0 0 200 R 50 50 0 0 P
+X SSRXN2 A10 0 -900 200 R 50 50 0 0 P
+X SSRXP2 A11 0 -1000 200 R 50 50 0 0 P
+X GND_2 A12 0 -1100 200 R 50 50 0 0 P
+X SSTXP1 A2 0 -100 200 R 50 50 0 0 P
+X SSTXN1 A3 0 -200 200 R 50 50 0 0 P
+X V_BUS_1 A4 0 -300 200 R 50 50 0 0 P
+X CC1 A5 0 -400 200 R 50 50 0 0 P
+X DP1 A6 0 -500 200 R 50 50 0 0 P
+X DN1 A7 0 -600 200 R 50 50 0 0 P
+X SBU1 A8 0 -700 200 R 50 50 0 0 P
+X V_BUS_2 A9 0 -800 200 R 50 50 0 0 P
+X GND_3 B1 0 -1200 200 R 50 50 0 0 P
+X SSRXN1 B10 1400 -700 200 L 50 50 0 0 P
+X SSRXP1 B11 1400 -800 200 L 50 50 0 0 P
+X GND_4 B12 1400 -900 200 L 50 50 0 0 P
+X SSTXP2 B2 0 -1300 200 R 50 50 0 0 P
+X SSTXN2 B3 1400 0 200 L 50 50 0 0 P
+X VBUS_1 B4 1400 -100 200 L 50 50 0 0 P
+X CC2 B5 1400 -200 200 L 50 50 0 0 P
+X DP2 B6 1400 -300 200 L 50 50 0 0 P
+X DN2 B7 1400 -400 200 L 50 50 0 0 P
+X SBU2 B8 1400 -500 200 L 50 50 0 0 P
+X VBUS_2 B9 1400 -600 200 L 50 50 0 0 P
+X GND_5 S1 1400 -1000 200 L 50 50 0 0 P
+X GND_6 S2 1400 -1100 200 L 50 50 0 0 P
+X GND_7 S3 1400 -1200 200 L 50 50 0 0 P
+X GND_8 S4 1400 -1300 200 L 50 50 0 0 P
+ENDDRAW
+ENDDEF
+#
+#End Library
