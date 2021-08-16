@@ -1,4 +1,18 @@
-19207329577050994
+19228505027479125
+7P-25.000MBP-T
+7P25000MBPT
+7P-25.000MBP-T-1
+Crystal or Oscillator
+0
+4
+4
+73171-0560
+731710560
+73171-0560-1
+Connector
+0
+4
+4
 Battery
 BatteryHolder_Bulgin_BX0036_1xC
 Bulgin Battery Holder, BX0036, Battery Type C (https://www.bulgin.com/products/pub/media/bulgin/data/Battery_holders.pdf)
@@ -50714,6 +50728,13 @@ One digit LED 7 segment SA39-11 SC39-11 SA39-12 SC39-12
 0
 10
 10
+ECS-5032MV-160-CN-TR
+ECS5032MV160CNTR
+ECS-5032MV-160-CN-TR-1
+Crystal or Oscillator
+0
+4
+4
 Ferrite_THT
 LairdTech_28C0236-0JW-10
 Ferrite, vertical, LairdTech 28C0236-0JW-10, https://assets.lairdtech.com/home/brandworld/files/28C0236-0JW-10.pdf, JW Miller core https://www.bourns.com/products/magnetic-products/j.w.-miller-through-hole-ferrite-beads-emi-filters
@@ -55089,6 +55110,20 @@ solder jumper open
 0
 5
 3
+KSS241GLFS
+KSS241GLFS
+KSS241GLFS-6
+Switch
+0
+2
+2
+LD56100DPU33R
+LD56100DPU33R
+DFN8 1.2 x 1.6mm
+Integrated Circuit
+0
+9
+9
 LED_SMD
 LED-APA102-2020
 http://www.led-color.com/upload/201604/APA102-2020%20SMD%20LED.pdf
@@ -56209,6 +56244,34 @@ Yellow 5381 Series LED
 0
 2
 2
+LT1761ES5-2.8#TRMPBF
+SOT95P280X100-5N
+5 Lead Plastic TSOT-23
+Integrated Circuit
+0
+5
+5
+LT1761ES5-5#TRPBF
+SOT95P280X90-5N
+S5 Package - TSOT-23
+Integrated Circuit
+0
+5
+5
+MCP73834-CNI_MF
+SON50P300X300X100-11N-D
+MCP73834-CNI/MF-1
+Integrated Circuit
+0
+11
+11
+MCP73834-FCI_UN
+SOP50P490X110-10N
+MCP73834-FCI/UN
+Integrated Circuit
+0
+10
+10
 Module
 A20_OLINUXINO_LIME2
 A20 Olinuxino LIME2, 1.2GHz, 512-1024MB RAM, Micro-SD, NAND or eMMC, 1000Mbit Ethernet
@@ -59692,6 +59755,20 @@ Oscillator
 Oscillator_SeikoEpson_SG-8002DC
 8-lead dip package, row spacing 7.62 mm (300 mils)
 DIL DIP PDIP 2.54mm 7.62mm 300mil
+0
+4
+4
+PTS645SK50JSMTR92_LFS
+PTS645SK50JSMTR92LFS
+PTS645SK50JSMTR92 LFS-2
+Switch
+0
+4
+4
+PTS647SM70SMTR2LFS
+PTS647SM38SMTR2LFS
+PTS647SM70SMTR2LFS-2
+Switch
 0
 4
 4
@@ -76292,6 +76369,13 @@ rotary encoder
 0
 5
 4
+STM32L412K8T6
+QFP80P900X900X160-32N
+lqfp32
+Integrated Circuit
+0
+32
+32
 Sensor
 Aosong_DHT11_5.5x12.0_P2.54mm
 Temperature and humidity module, http://akizukidenshi.com/download/ds/aosong/DHT11.pdf
@@ -82256,6 +82340,13 @@ transformer flyback
 0
 10
 10
+UJ31-CH-G2-SMT-TR
+UJ31CHG2SMTTR
+UJ31-CH-G2-SMT-TR-1
+Connector
+0
+30
+30
 Valve
 Valve_ECC-83-1
 Valve ECC-83-1 round pins
