@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP 7P-25.000MBP-T
+D Standard Clock Oscillators 25MHz 3.3Volt .28ppm -40C +85C
+K
+F https://www.mouser.cn/datasheet/2/417/7P-552878.pdf
+$ENDCMP
+#
+#End Doc Library

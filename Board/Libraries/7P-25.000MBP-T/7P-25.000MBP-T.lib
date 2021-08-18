@@ -1,0 +1,27 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model 7P-25.000MBP-T
+#/1884856/167203/2.47/4/4/Crystal or Oscillator
+DEF 7P-25.000MBP-T Y 0 30 Y Y 1 F N
+F0 "Y" 1350 300 50 H V L CNN
+F1 "7P-25.000MBP-T" 1350 200 50 H V L CNN
+F2 "7P25000MBPT" 1350 100 50 H I L CNN
+F3 "https://www.mouser.cn/datasheet/2/417/7P-552878.pdf" 1350 0 50 H I L CNN
+F4 "Standard Clock Oscillators 25MHz 3.3Volt .28ppm -40C +85C" 1350 -100 50 H I L CNN "Description"
+F5 "1.5" 1350 -200 50 H I L CNN "Height"
+F6 "TXC" 1350 -300 50 H I L CNN "Manufacturer_Name"
+F7 "7P-25.000MBP-T" 1350 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "" 1350 -500 50 H I L CNN "Arrow Part Number"
+F9 "" 1350 -600 50 H I L CNN "Arrow Price/Stock"
+F10 "717-7P-25.000MBP-T" 1350 -700 50 H I L CNN "Mouser Part Number"
+F11 "https://www.mouser.com/Search/Refine.aspx?Keyword=717-7P-25.000MBP-T" 1350 -800 50 H I L CNN "Mouser Price/Stock"
+DRAW
+X AFC_OR_GND 1 0 -100 200 R 50 50 0 0 P
+X GND 3 1500 -100 200 L 50 50 0 0 P
+X OUTPUT 4 1500 0 200 L 50 50 0 0 P
+X VCC 6 0 0 200 R 50 50 0 0 P
+P 5 0 1 6 200 100 1300 100 1300 -200 200 -200 200 100 N
+ENDDRAW
+ENDDEF
+#
+#End Library

@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP KSS241GLFS
+D IP40 Side Tactile Switch, SPST-NO 50 mA @ 32 V dc
+K
+F https://www.ckswitches.com/media/1463/kss.pdf
+$ENDCMP
+#
+#End Doc Library
