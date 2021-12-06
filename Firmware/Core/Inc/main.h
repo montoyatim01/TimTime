@@ -97,6 +97,27 @@ void Error_Handler(void);
 #define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 void SystemClock_Config(void);
+
+//Global variables
+extern volatile uint32_t clockFrame;
+extern volatile bool tcJammed;
+
+extern uint8_t frameRate;
+
+extern volatile uint16_t compensationCounter;
+extern volatile bool compensateEnable;
+const uint32_t calibrationAInterval = 240000;
+extern int32_t calibrationA;
+extern int32_t calibrationArray[5];
+const uint32_t calibrationInterval[5];
+const uint8_t frameRateDivisor[5];
+const uint16_t frameRateARR[5];
+
+extern bool stat1;
+extern bool stat2;
+
+extern uint8_t autoOff;
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

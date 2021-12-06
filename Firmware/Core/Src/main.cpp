@@ -59,20 +59,20 @@ TIM_HandleTypeDef htim16;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-void setDigit(int addr, int digit, uint8_t value, bool dp);
-void spiTransfer(int addr, volatile uint8_t opcode, volatile uint8_t data);
-void transposeData(int addr);
-void shiftRight(uint8_t theArray[], uint8_t theArraySize);
+//void setDigit(int addr, int digit, uint8_t value, bool dp);
+//void spiTransfer(int addr, volatile uint8_t opcode, volatile uint8_t data);
+//void transposeData(int addr);
+//void shiftRight(uint8_t theArray[], uint8_t theArraySize);
 void initTimecode();
-void clearBuffer(uint8_t theArray[], uint8_t theArraySize);
+//void clearBuffer(uint8_t theArray[], uint8_t theArraySize);
 void writeTimecode();
 //void updateDisplay(bool on);
 void calibrate();
-void JumpToBootloader(void);
+//void JumpToBootloader(void);
 void updateDisplay(uint8_t state);
 
-void write_eeprom_reg(uint16_t reg_addr, uint8_t value);
-uint8_t  read_eeprom_reg(uint16_t addr);
+//void write_eeprom_reg(uint16_t reg_addr, uint8_t value);
+//uint8_t  read_eeprom_reg(uint16_t addr);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -175,10 +175,10 @@ int32_t calibrationA;
 //const uint32_t calibration = 23999963;
 const uint32_t calibration = 23999979;
 
-int32_t calibrationArray[5];
+int32_t calibrationArray[6];
 //calibrationArray[frameRate]
 
-const uint32_t calibrationInterval[5] = {240000,240000,250000,300000,300000};
+const uint32_t calibrationInterval[6] = {240000,240000,250000,300000,300000,300000};
 //calibrationInterval[frameRate]
 
 /*
@@ -197,9 +197,9 @@ uint8_t frameRate = 0;	//Global frame rate change
  * 3 = 29.97
  * 4 = 30
  */
-uint8_t frRDv[5] = {24,24,25,30,30};	//Frame rate divisor array
+uint8_t frRDv[6] = {24,24,25,30,30,30};	//Frame rate divisor array
 //frRDv[frameRate]
-const uint16_t frARR[5] = {50049,49999,47999,40039,39999};	//Frame rate Timer ARR
+const uint16_t frARR[6] = {50049,49999,47999,40039,40039,39999};	//Frame rate Timer ARR
 //frARR[frameRate]
 
 
@@ -298,6 +298,13 @@ HAL_TIM_Base_Start_IT(&htim7);		//Throw a microsecond delay in here to align the
   while (1)
   {
     //JumpToBootloader();
+
+    /* TODO
+    * Only update display every 4th cycle?
+    * Run tests on optimal update range
+    * Timecode output is top priority
+    *
+    */
 updateDisplay(0x01);
 	      stat1 = GPIOA -> IDR & GPIO_PIN_9;
     stat2 = GPIOA -> IDR & GPIO_PIN_10;
@@ -909,7 +916,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void calibrate(){
+void calibrate(){ //Find notes on how this works
 	calibrationA = 1201200000 - (int32_t(	(double(calibration)/20.0) * 1001));
 	calibrationArray[0] = 1201200000 - (int32_t(	(double(calibration)/20.0) * 1001));
 	calibrationArray[1] = 1200000000 - (int32_t(	(double(calibration)/20.0) * 1000));
@@ -918,101 +925,7 @@ void calibrate(){
 	calibrationArray[4] = 1200000000 - (int32_t(	(double(calibration)/20.0) * 1000));
 }
 
-void setDigit(int addr, int digit, uint8_t value, bool dp) {
-	int offset;
-	uint8_t v;
 
-	    if(addr<0 || addr>=8)
-		return;
-	    if(digit<0 || digit>7 || value>15)
-		return;
-	    offset=addr*8;
-	    //v=charTable[value];
-	    if(dp)
-		v|=0B10000000;
-	    status[offset+digit]=v;
-	    if (anodeMode) {
-	    	//transpose the digit matrix
-	    	transposeData(addr);
-	    	//send the entire set of digits
-	    	for(int i=0;i<8;i++) {
-		    spiTransfer(addr, i+1, statusTransposed[offset+i]);
-	    	}
-	    } else {
-	    	spiTransfer(addr, digit+1, v);
-	    }
-}
-
-void spiTransfer(int addr, volatile uint8_t opcode, volatile uint8_t data) {
-	//Create an array with the data to shift out
-	    int offset=addr*2;
-	    int maxbytes=8*2;
-
-	    for(int i=0;i<maxbytes;i++)
-		spidata[i]=(uint8_t)0;
-	    //put our device data into the array
-	    spidata[offset]=opcode;
-	    spidata[offset+1]=data;
-	    //enable the line
-	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
-	    //Now shift out the data
-	    //HAL_SPI_Transmit(&hspi1,(uint8_t*)spidata, 2, 100);
-	    //latch the data onto the display
-	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-
-
-
-
-
-}
-
-void transposeData(int addr) {
-	int offset=addr*8;
-	uint8_t a0, a1, a2, a3, a4, a5, a6, a7,
-	       b0, b1, b2, b3, b4, b5, b6, b7;
-
-	  // Perform a bitwise transpose operation on an 8x8 bit matrix, stored as 8-byte array.
-	  // We have to use the naive method because we're working on a 16-bit microprocessor.
-
-	  // Load the array into eight one-byte variables.
-	  a0 = status[offset];
-	  a1 = status[offset+1];
-	  a2 = status[offset+2];
-	  a3 = status[offset+3];
-	  a4 = status[offset+4];
-	  a5 = status[offset+5];
-	  a6 = status[offset+6];
-	  a7 = status[offset+7];
-
-	  // Magic happens. Credit goes to: http://www.hackersdelight.org/HDcode/transpose8.c.txt
-	  b0 = (a0 & 128)    | (a1 & 128)/2  | (a2 & 128)/4  | (a3 & 128)/8 |
-	       (a4 & 128)/16 | (a5 & 128)/32 | (a6 & 128)/64 | (a7      )/128;
-	  b1 = (a0 &  64)*2  | (a1 &  64)    | (a2 &  64)/2  | (a3 &  64)/4 |
-	       (a4 &  64)/8  | (a5 &  64)/16 | (a6 &  64)/32 | (a7 &  64)/64;
-	  b2 = (a0 &  32)*4  | (a1 &  32)*2  | (a2 &  32)    | (a3 &  32)/2 |
-	       (a4 &  32)/4  | (a5 &  32)/8  | (a6 &  32)/16 | (a7 &  32)/32;
-	  b3 = (a0 &  16)*8  | (a1 &  16)*4  | (a2 &  16)*2  | (a3 &  16)   |
-	       (a4 &  16)/2  | (a5 &  16)/4  | (a6 &  16)/8  | (a7 &  16)/16;
-	  b4 = (a0 &   8)*16 | (a1 &   8)*8  | (a2 &   8)*4  | (a3 &   8)*2 |
-	       (a4 &   8)    | (a5 &   8)/2  | (a6 &   8)/4  | (a7 &   8)/8;
-	  b5 = (a0 &   4)*32 | (a1 &   4)*16 | (a2 &   4)*8  | (a3 &   4)*4 |
-	       (a4 &   4)*2  | (a5 &   4)    | (a6 &   4)/2  | (a7 &   4)/4;
-	  b6 = (a0 &   2)*64 | (a1 &   2)*32 | (a2 &   2)*16 | (a3 &   2)*8 |
-	       (a4 &   2)*4  | (a5 &   2)*2  | (a6 &   2)    | (a7 &   2)/2;
-	  b7 = (a0      )*128| (a1 &   1)*64 | (a2 &   1)*32 | (a3 &   1)*16|
-	       (a4 &   1)*8  | (a5 &   1)*4  | (a6 &   1)*2  | (a7 &   1);
-
-	  // Assemble into output array.
-	  statusTransposed[offset] = b0;
-	  statusTransposed[offset+1] = b1;
-	  statusTransposed[offset+2] = b2;
-	  statusTransposed[offset+3] = b3;
-	  statusTransposed[offset+4] = b4;
-	  statusTransposed[offset+5] = b5;
-	  statusTransposed[offset+6] = b6;
-	  statusTransposed[offset+7] = b7;
-
-}
 
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
@@ -1022,7 +935,10 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     {
 //Offset++;
 		__disable_irq();
-
+/* 
+    Credit for this loop to read out the timecode:
+    https://forum.arduino.cc/t/smpte-jam-sync/529740/4
+*/
     	edgeTimeDiff = __HAL_TIM_GetCounter(htim);          // Get time difference between this and last edge
 
     	__HAL_TIM_SetCounter(htim,0);
@@ -1111,21 +1027,8 @@ initTimecode();
 	__enable_irq();
 }
 
-void clearBuffer(uint8_t theArray[], uint8_t theArraySize){
-  for (uint8_t x = 0; x < theArraySize - 1; x++){
-    theArray[x] = 0;
-  }
-}
 
-void shiftRight(uint8_t theArray[], uint8_t theArraySize){
-  uint8_t x;
-  for (x = theArraySize; x > 0; x--){
-    uint8_t xBit = bitRead(theArray[x - 1], 0);
-    theArray[x] = theArray[x] >> 1;
-    theArray[x] = theArray[x] | (xBit << 7);
-  }
-  theArray[x] = theArray[x] >> 1;
-}
+
 
 void initTimecode(){
   int hr = int(xtc[1] & 0x0F) + (int(xtc[0] & 0x03)*10);
@@ -1133,15 +1036,6 @@ void initTimecode(){
   int sc = int(xtc[5] & 0x0F) + (int(xtc[4] & 0x07)*10);
   int fr = int(xtc[7] & 0x0F) + (int(xtc[6] & 0x03)*10);
   clockFrame = (hr * 60 * 60 * frRDv[frameRate]) + (mn * 60 * frRDv[frameRate]) + (sc * frRDv[frameRate]) + fr;
-}
-void delay_us (uint16_t us)
-{
-	//int dispCount = 0;
-	//__HAL_TIM_SET_COUNTER(&htim7,0);  // set the counter value a 0
-	//while (__HAL_TIM_GET_COUNTER(&htim7) < us){
-		//while (dispCount < 1){
-		//}
-	//}
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -1223,17 +1117,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  }
 
   }
-  if (htim == &htim7){
+  if (htim == &htim7){  //Triggers once per frame
 	  __disable_irq();
 	  clockFrame++;
-	  if (compensate){
-		  //reset to 50049
+	  if (compensate){    //If coming back from compensation
+		  //reset to proper ARR
 		  __HAL_TIM_SET_AUTORELOAD(&htim7,frARR[frameRate]);
 		  //TIM7->ARR = 50049;
 		  compensate = false;
 		  compensationCounter = 0;
 	  }
-
+    //If it's time to compensate
 	  if (compensationCounter == calibrationInterval[frameRate]){
 		  __HAL_TIM_SET_AUTORELOAD(&htim7, (frARR[frameRate] + calibrationArray[frameRate]));
 		  compensate = true;
@@ -1241,7 +1135,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  }
 compensationCounter++;
 
-
+    //Remove this blinky bit. Put in the main loop
 	  if (clockFrame % frRDv[frameRate] == 0){
 		  blink = true;
 	  } else {
@@ -1251,32 +1145,6 @@ compensationCounter++;
 	  __enable_irq();
   }
 }
-
-/**
- * Function to perform jump to system memory boot from user application
- *
- * Call function when you want to jump to system memory
- */
-void JumpToBootloader(void) {
-void (*SysMemBootJump)(void);
-  volatile uint32_t addr = 0x1FFF0000;
-  //HAL_RCC_DeInit();
-
-  SysTick->CTRL = 0;
-  SysTick->LOAD = 0;
-  SysTick->VAL = 0;
-  __disable_irq();
-  //__HAL_RCC_SYSCFG_CLK_ENABLE();           //make sure syscfg clocked
-  __DSB();
-  __HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();  //remap system memory to address 0x0000000
-  __DSB();
-  __ISB();
-  SCB->VTOR = 0;                           //set vector table offset to 0
-  SysMemBootJump = (void (*)(void)) (*((uint32_t *)(addr + 4)));
-  __set_MSP(*(uint32_t *)addr);
-    SysMemBootJump();
-}
-
 
 
 
