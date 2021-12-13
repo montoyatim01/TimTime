@@ -1,8 +1,6 @@
 #ifndef __DISPLAY_H
 #define __DISPLAY_H
-
-
-
+#include <stdint.h>
 typedef enum{
     d_off = 0x0,
     d_home = 0x1,
@@ -17,7 +15,7 @@ typedef enum{
 
 
 
-#else
+
 void updateDisplay(uint8_t state);
 void displayOff();
 void displayMain();

@@ -2,5 +2,5 @@ Timecode.cpp:9:6:bool initTimecode()	24	static
 Timecode.cpp:34:6:bool jamConfirmation()	4	static
 Timecode.cpp:43:6:bool timecodeBreakout(uint8_t*, uint8_t*, uint8_t*, uint8_t*, uint32_t, uint8_t)	24	static
 Timecode.cpp:54:6:bool resetTimecode()	8	static
-Timecode.cpp:85:6:void calibrate()	32	static
-Timecode.cpp:101:6:void frameCheck()	4	static
+Timecode.cpp:86:6:void calibrate()	32	static
+Timecode.cpp:102:6:void frameCheck()	4	static

@@ -22,12 +22,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-extern "C" {
 
-}
-#include "Display.h"
+#include "Global.h"
 #include "Timecode.h"
 #include "Menu.h"
+#include "Display.h"
+#include "Battery.h"
 #define EEPROM_ADDRESS	0xA0
 /* USER CODE END Includes */
 
@@ -96,32 +96,6 @@ static void MX_USB_PCD_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-/*Global Variables*/
-uint8_t tc[10] = {0};  // ISR Buffer to store incoming bits
-volatile uint8_t tcIN[8] = {0};         // Buffer to store valid TC data - sync bytes
-volatile bool tcJammed = false;
-uint8_t frameRate = 0;	//Global frame rate change
-
-volatile uint32_t clockFrame = 0;
-
-uint8_t intOffset = 0;
-
-uint8_t autoOff = 0;
-uint16_t autoOffMinutes = 60;
-uint16_t uptimeMinutes = 0;
-float batteryRemaining = 0.0;
-
-uint8_t hr, mn, sc, fr = 0;
-
-bool stat1, stat2;
-bool buttonsHeld = false;
-
-int32_t calibrationArray[6] = {0};
-uint32_t calibrationInterval[6] = {240000,240000,250000,300000,300000,300000};
-uint8_t frameRateDivisor[6] = {24,24,25,30,30,30};
-uint16_t frameRateARR[6] = {50049,49999,47999,40039,40039,39999};
-
-
 ADC_HandleTypeDef *battADC = &hadc1;
 I2C_HandleTypeDef *dispI2C = &hi2c2;
 I2C_HandleTypeDef *memI2C=  &hi2c1;
@@ -133,6 +107,7 @@ TIM_HandleTypeDef *countTIM = &htim7;
 //int Offset, hr, mn, sc, fr,setA,setB;
 //volatile uint32_t clockFrame = 0;
 uint32_t clockFrameOutput = 0;
+uint8_t tc[10] = {0}; // ISR Buffer to store incoming bits
 //uint32_t clockFramePrevious = 0;
 volatile uint8_t jamCount = 0;
 
@@ -162,7 +137,7 @@ uint8_t tcWriteBuf[10];
 char dispOffset[3];
 //uint32_t buttonTime;
 
-uint32_t displayTimeout = 0;
+
 int prevOffset;
 bool displayOn;
 
@@ -295,7 +270,7 @@ calibrate();
   tcWrite[9] = 0b10111111;  //Sync pattern
 
 
-
+initDisplay();
  updateDisplay(0x1);
   //HAL_Delay(3000);
 
@@ -411,6 +386,8 @@ if(GPIOC -> IDR & GPIO_PIN_13){	//Menu button
 					//menuEnter = true;
 					updateDisplay(d_menu);
 	    			menuLoop();
+            while (GPIOC -> IDR & GPIO_PIN_13)
+              {updateDisplay(0x1);}//add in TC process?}
 					//menuEnter = false;
 
 	    		}

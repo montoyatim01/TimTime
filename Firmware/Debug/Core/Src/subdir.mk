@@ -15,6 +15,7 @@ C_SRCS += \
 CPP_SRCS += \
 ../Core/Src/Battery.cpp \
 ../Core/Src/Display.cpp \
+../Core/Src/Global.cpp \
 ../Core/Src/Menu.cpp \
 ../Core/Src/Timecode.cpp \
 ../Core/Src/main.cpp 
@@ -30,6 +31,7 @@ C_DEPS += \
 OBJS += \
 ./Core/Src/Battery.o \
 ./Core/Src/Display.o \
+./Core/Src/Global.o \
 ./Core/Src/Menu.o \
 ./Core/Src/Timecode.o \
 ./Core/Src/main.o \
@@ -43,6 +45,7 @@ OBJS += \
 CPP_DEPS += \
 ./Core/Src/Battery.d \
 ./Core/Src/Display.d \
+./Core/Src/Global.d \
 ./Core/Src/Menu.d \
 ./Core/Src/Timecode.d \
 ./Core/Src/main.d 
@@ -57,7 +60,7 @@ Core/Src/%.o: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/Battery.d ./Core/Src/Battery.o ./Core/Src/Display.d ./Core/Src/Display.o ./Core/Src/Menu.d ./Core/Src/Menu.o ./Core/Src/Timecode.d ./Core/Src/Timecode.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/ssd1306.d ./Core/Src/ssd1306.o ./Core/Src/stm32l4xx_hal_msp.d ./Core/Src/stm32l4xx_hal_msp.o ./Core/Src/stm32l4xx_it.d ./Core/Src/stm32l4xx_it.o ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/system_stm32l4xx.d ./Core/Src/system_stm32l4xx.o
+	-$(RM) ./Core/Src/Battery.d ./Core/Src/Battery.o ./Core/Src/Display.d ./Core/Src/Display.o ./Core/Src/Global.d ./Core/Src/Global.o ./Core/Src/Menu.d ./Core/Src/Menu.o ./Core/Src/Timecode.d ./Core/Src/Timecode.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/ssd1306.d ./Core/Src/ssd1306.o ./Core/Src/stm32l4xx_hal_msp.d ./Core/Src/stm32l4xx_hal_msp.o ./Core/Src/stm32l4xx_it.d ./Core/Src/stm32l4xx_it.o ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/system_stm32l4xx.d ./Core/Src/system_stm32l4xx.o
 
 .PHONY: clean-Core-2f-Src
 

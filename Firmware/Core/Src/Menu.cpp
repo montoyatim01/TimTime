@@ -1,18 +1,20 @@
 #include "Menu.h"
-#include "main.h"
 #include "Display.h"
 #include "Timecode.h"
 #include "stm32l4xx_hal.h"
+#include "Global.h"
+
 uint32_t buttonTime;
-uint8_t rateAdjust = frameRate;
-uint8_t offsetAdjust = intOffset;
+uint8_t rateAdjust;
+uint8_t offsetAdjust;
 bool menuItemSelect = false;
 uint8_t menuItem = 0;
 bool highlightYes = false;
 void menuLoop()
 {
     bool inMenu = true;
-    
+    rateAdjust = frameRate;
+    offsetAdjust = intOffset;
     
     /*
 	 * Check button press. If menu item selected, advance the option
@@ -35,7 +37,7 @@ void menuLoop()
         {
             inMenu = false;
         }
-        if (GPIOB->IDR & GPIO_PIN_8)
+        if (GPIOB->IDR & GPIO_PIN_9)
         { //Plus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -45,22 +47,26 @@ void menuLoop()
                     switch (menuItem)
                     {
                     case 0: //Rate
-                        rateAdjust++;
-                        if (rateAdjust > 5)
-                            rateAdjust = 0;
+                        if (rateAdjust == 0)
+                            rateAdjust = 5;
+                        else
+                            rateAdjust--;
                         break;
                     case 1: //Offset
-                        autoOff++;
-                        if (autoOff > 4)
-                            autoOff = 0;
-                        break;
-                    case 2:
-                        break;
-                    case 3:
                         offsetAdjust++;
                         if (offsetAdjust > (frameRateDivisor[frameRate] * 2))
                             offsetAdjust = (frameRateDivisor[frameRate] * 2);
                         break;
+                    case 2:
+                        break;
+                    case 3:
+                        if (autoOff == 0)
+                            autoOff = 4;
+                        else
+                            autoOff--;
+                        break;
+                        
+                        
                     }
                 }
                 else
@@ -73,7 +79,7 @@ void menuLoop()
             }
         }
 
-        if (GPIOB->IDR & GPIO_PIN_9)
+        if (GPIOB->IDR & GPIO_PIN_8)
         { //Minus button
 
             displayTimeout = HAL_GetTick();
@@ -84,24 +90,24 @@ void menuLoop()
                     switch (menuItem)
                     {
                     case 0:
-                        if (rateAdjust == 0)
-                            rateAdjust = 5;
-                        else
-                            rateAdjust--;
+                        rateAdjust++;
+                        if (rateAdjust > 5)
+                            rateAdjust = 0;
                         break;
+                        
                     case 1:
-                        if (autoOff == 0)
-                            autoOff = 4;
-                        else
-                            autoOff--;
-                        break;
-                    case 2:
-                        break;
-                    case 3:
                         if (offsetAdjust == 0)
                             offsetAdjust = 0;
                         else
                             offsetAdjust--;
+                        break;
+                        
+                    case 2:
+                        break;
+                    case 3:
+                        autoOff++;
+                        if (autoOff > 4)
+                            autoOff = 0;
                         break;
                     }
                 }
@@ -133,10 +139,15 @@ void menuLoop()
                             menuItemSelect = true;
                             break;
                         case 1: //Offset
-                            offsetAlert();
+                            menuItemSelect = true;
+                            //offsetAlert();
+                            ///while (GPIOC->IDR & GPIO_PIN_13)
+                            //{displayTimeout = HAL_GetTick();}
                             break;
                         case 2: //Re-jam
                             reJamAlert();
+                            while (GPIOC->IDR & GPIO_PIN_13)
+                            {displayTimeout = HAL_GetTick();}
                             break;
                         case 3: //Auto-Off
                             menuItemSelect = true;
@@ -157,9 +168,15 @@ void menuLoop()
                         {
                         case 0: //Rate
                             menuItemSelect = false;
+                            rateAlert();
+                            while (GPIOC->IDR & GPIO_PIN_13)
+                            {displayTimeout = HAL_GetTick();}
+                            rateAdjust = frameRate;
                             break;
                         case 1: //Offset
                             offsetAlert();
+                            while (GPIOC->IDR & GPIO_PIN_13)
+                            {displayTimeout = HAL_GetTick();}
                             menuItemSelect = false;
                             break;
                         case 2: //Re-Jam
@@ -219,7 +236,7 @@ void rateAlert()
             inLoop = false;
         }
 
-        if (GPIOB->IDR & GPIO_PIN_8)
+        if (GPIOB->IDR & GPIO_PIN_9)
         { //Plus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -229,7 +246,7 @@ void rateAlert()
             }
         }
 
-        if (GPIOB->IDR & GPIO_PIN_9)
+        if (GPIOB->IDR & GPIO_PIN_8)
         { //Minus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -248,9 +265,12 @@ void rateAlert()
                 {
                     frameRate = rateAdjust;
                     resetTimecode();
-                    highlightYes = !highlightYes;
+                    highlightYes = false;
+                    inLoop = false;
+                    break;
                 }
-                
+                inLoop = false;
+                break;
                 buttonTime = HAL_GetTick(); //Debounce timer
             }
         }
@@ -268,7 +288,7 @@ void offsetAlert()
     while (inLoop)
     {
         updateDisplay(0x6);
-        if (HAL_GetTick() - displayTimeout > 5000)
+        if (HAL_GetTick() - displayTimeout > 8000)
         {
             highlightYes = false;
             inLoop = false;
@@ -284,6 +304,7 @@ void offsetAlert()
                 intOffset = offsetAdjust;
                 highlightYes = !highlightYes;
                 buttonTime = HAL_GetTick(); //Debounce timer
+                inLoop = false;
             }
         }
     }
@@ -307,7 +328,7 @@ void reJamAlert()
             inLoop = false;
         }
 
-        if (GPIOB->IDR & GPIO_PIN_8)
+        if (GPIOB->IDR & GPIO_PIN_9)
         { //Plus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -317,7 +338,7 @@ void reJamAlert()
             }
         }
 
-        if (GPIOB->IDR & GPIO_PIN_9)
+        if (GPIOB->IDR & GPIO_PIN_8)
         { //Minus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -339,6 +360,7 @@ void reJamAlert()
                     highlightYes = !highlightYes;
                 }
                 buttonTime = HAL_GetTick(); //Debounce timer
+                inLoop = false;
             }
         }
     }

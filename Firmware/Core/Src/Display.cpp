@@ -1,6 +1,10 @@
 #include "Display.h"
+#include "Global.h"
+#include "Menu.h"
+extern "C" {
+#include "ssd1306.h"
+}
 #include "main.h"
-#include "menu.h"
 
 //#include "fonts.h"
 const char* foo = "0123456789";
@@ -108,21 +112,27 @@ void displayMenu()
 	//Frame rate
 	//Auto power off
 	//Exit
-	ssd1306_SetCursor(50, 2);
+	ssd1306_SetCursor(50, 0);
 	ssd1306_WriteString("Menu", Font_7x10, White);
-	ssd1306_SetCursor(10, 14);
+	ssd1306_SetCursor(10, 12);
 	ssd1306_WriteString("Rate: ", Font_7x10, White);
-	ssd1306_SetCursor(10, 24);
+	ssd1306_SetCursor(10, 22);
 	ssd1306_WriteString("Offset: ", Font_7x10, White);
-	ssd1306_SetCursor(10, 34);
+	ssd1306_SetCursor(10, 32);
 	ssd1306_WriteString("Re-jam", Font_7x10, White);
-	ssd1306_SetCursor(10, 44);
+	ssd1306_SetCursor(10, 42);
 	ssd1306_WriteString("Auto-Off: ", Font_7x10, White);
-	ssd1306_SetCursor(50, 54);
+	ssd1306_SetCursor(50, 52);
 	ssd1306_WriteString("Exit", Font_7x10, White);
 
-	ssd1306_SetCursor(50, 14);
-	switch (frameRate)
+	ssd1306_SetCursor(50, 12);
+	uint8_t dispRate;
+	if (menuItemSelect){
+		dispRate = rateAdjust;
+	} else {
+		dispRate = frameRate;
+	}
+	switch (dispRate)
 	{
 	case 0:
 		ssd1306_WriteString("23.98", Font_7x10, White);
@@ -143,10 +153,10 @@ void displayMenu()
 		ssd1306_WriteString("30", Font_7x10, White);
 		break;
 	}
-	ssd1306_SetCursor(75, 24);
+	ssd1306_SetCursor(75, 22);
 	//Insert offset
 
-	ssd1306_SetCursor(75, 44);
+	ssd1306_SetCursor(75, 42);
 	switch (autoOff)
 	{
 	case 0:
@@ -171,24 +181,24 @@ void displayMenu()
 	case 0:
 		if (menuItemSelect)
 		{
-			ssd1306_SetCursor(120, 14);
+			ssd1306_SetCursor(120, 12);
 			ssd1306_WriteString("<", Font_7x10, White);
 		}
 		else
 		{
-			ssd1306_SetCursor(2, 14);
+			ssd1306_SetCursor(2, 12);
 			ssd1306_WriteString(">", Font_7x10, White);
 		}
 		break;
 	case 1:
 		if (menuItemSelect)
 		{
-			ssd1306_SetCursor(120, 24);
+			ssd1306_SetCursor(120, 22);
 			ssd1306_WriteString("<", Font_7x10, White);
 		}
 		else
 		{
-			ssd1306_SetCursor(2, 24);
+			ssd1306_SetCursor(2, 22);
 			ssd1306_WriteString(">", Font_7x10, White);
 		}
 
@@ -196,12 +206,12 @@ void displayMenu()
 	case 2:
 		if (menuItemSelect)
 		{
-			ssd1306_SetCursor(120, 34);
+			ssd1306_SetCursor(120, 32);
 			ssd1306_WriteString("<", Font_7x10, White);
 		}
 		else
 		{
-			ssd1306_SetCursor(2, 34);
+			ssd1306_SetCursor(2, 32);
 			ssd1306_WriteString(">", Font_7x10, White);
 		}
 
@@ -209,20 +219,20 @@ void displayMenu()
 	case 3:
 		if (menuItemSelect)
 		{
-			ssd1306_SetCursor(120, 44);
+			ssd1306_SetCursor(120, 42);
 			ssd1306_WriteString("<", Font_7x10, White);
 		}
 		else
 		{
-			ssd1306_SetCursor(2, 44);
+			ssd1306_SetCursor(2, 42);
 			ssd1306_WriteString(">", Font_7x10, White);
 		}
 
 		break;
 	case 4:
-		ssd1306_SetCursor(40, 54);
+		ssd1306_SetCursor(41, 52);
 		ssd1306_WriteString(">", Font_7x10, White);
-		ssd1306_SetCursor(79, 54);
+		ssd1306_SetCursor(79, 52);
 		ssd1306_WriteString("<", Font_7x10, White);
 		break;
 	}
@@ -233,29 +243,29 @@ void displayMenu()
 void displayConfirmationRateChange()
 {
 	ssd1306_Fill(Black);
-	ssd1306_SetCursor(14, 10);
-	ssd1306_WriteString("Changing the frame rate", Font_7x10, White);
-	ssd1306_SetCursor(14, 22);
-	ssd1306_WriteString("will clear the current jam", Font_7x10, White);
-	ssd1306_SetCursor(14, 34);
+	ssd1306_SetCursor(8, 4);
+	ssd1306_WriteString("Changing the rate", Font_7x10, White);
+	ssd1306_SetCursor(16, 18);
+	ssd1306_WriteString("will clear jam.", Font_7x10, White);
+	ssd1306_SetCursor(32, 32);
 	ssd1306_WriteString("Continue?", Font_7x10, White);
-	ssd1306_SetCursor(30, 48);
-	ssd1306_WriteString("NO", Font_11x18, White);
-	ssd1306_SetCursor(80, 48);
-	ssd1306_WriteString("YES", Font_11x18, White);
+	ssd1306_SetCursor(30, 50);
+	ssd1306_WriteString("NO", Font_7x10, White);
+	ssd1306_SetCursor(80, 50);
+	ssd1306_WriteString("YES", Font_7x10, White);
 	if (highlightYes)
 	{
-		ssd1306_SetCursor(20, 48);
-		ssd1306_WriteString(">", Font_11x18, White);
-		ssd1306_SetCursor(70, 48);
-		ssd1306_WriteString("<", Font_11x18, White);
+		ssd1306_SetCursor(72, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(102, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
 	}
 	else
 	{
-		ssd1306_SetCursor(72, 48);
-		ssd1306_WriteString(">", Font_11x18, White);
-		ssd1306_SetCursor(100, 48);
-		ssd1306_WriteString("<", Font_11x18, White);
+		ssd1306_SetCursor(22, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(45, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
 	}
 	ssd1306_UpdateScreen(dispI2C);
 }
@@ -263,20 +273,22 @@ void displayConfirmationRateChange()
 void displayConfirmationOffsetChange()
 {
 	ssd1306_Fill(Black);
-	ssd1306_SetCursor(14, 10);
-	ssd1306_WriteString("Changing the offset will", Font_7x10, White);
+	ssd1306_SetCursor(10, 10);
+	ssd1306_WriteString("The offset will", Font_7x10, White);
 	ssd1306_SetCursor(14, 22);
-	ssd1306_WriteString("take effect on next jam", Font_7x10, White);
+	ssd1306_WriteString("take effect on", Font_7x10, White);
+	ssd1306_SetCursor(36, 34);
+	ssd1306_WriteString("next jam.", Font_7x10, White);
 	//ssd1306_SetCursor(14, 34);
 	//ssd1306_WriteString("Continue?", Font_7x10, White);
 	//ssd1306_SetCursor(30, 48);
 	//ssd1306_WriteString("NO", Font_11x18, White);
-	ssd1306_SetCursor(100, 48);
-	ssd1306_WriteString("OK", Font_11x18, White);
-		ssd1306_SetCursor(92, 48);
-		ssd1306_WriteString(">", Font_11x18, White);
-		ssd1306_SetCursor(110, 48);
-		ssd1306_WriteString("<", Font_11x18, White);
+	ssd1306_SetCursor(52, 50);
+	ssd1306_WriteString("OK", Font_7x10, White);
+		ssd1306_SetCursor(44, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(66, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
 	
 	ssd1306_UpdateScreen(dispI2C);
 }
@@ -284,29 +296,29 @@ void displayConfirmationOffsetChange()
 void displayConfirmationRejam()
 {
 	ssd1306_Fill(Black);
-	ssd1306_SetCursor(14, 10);
-	ssd1306_WriteString("Are you sure you want", Font_7x10, White);
-	ssd1306_SetCursor(14, 22);
-	ssd1306_WriteString("to clear the current jam", Font_7x10, White);
-	ssd1306_SetCursor(14, 34);
-	ssd1306_WriteString("and re-jam?", Font_7x10, White);
-	ssd1306_SetCursor(30, 48);
-	ssd1306_WriteString("NO", Font_11x18, White);
-	ssd1306_SetCursor(80, 48);
-	ssd1306_WriteString("YES", Font_11x18, White);
+	ssd1306_SetCursor(12, 6);
+	ssd1306_WriteString("This will clear", Font_7x10, White);
+	ssd1306_SetCursor(24, 18);
+	ssd1306_WriteString("current jam.", Font_7x10, White);
+	ssd1306_SetCursor(34, 32);
+	ssd1306_WriteString("Continue?", Font_7x10, White);
+	ssd1306_SetCursor(30, 50);
+	ssd1306_WriteString("NO", Font_7x10, White);
+	ssd1306_SetCursor(80, 50);
+	ssd1306_WriteString("YES", Font_7x10, White);
 	if (highlightYes)
 	{
-		ssd1306_SetCursor(20, 48);
-		ssd1306_WriteString(">", Font_11x18, White);
-		ssd1306_SetCursor(70, 48);
-		ssd1306_WriteString("<", Font_11x18, White);
+		ssd1306_SetCursor(72, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(102, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
 	}
 	else
 	{
-		ssd1306_SetCursor(72, 48);
-		ssd1306_WriteString(">", Font_11x18, White);
-		ssd1306_SetCursor(100, 48);
-		ssd1306_WriteString("<", Font_11x18, White);
+		ssd1306_SetCursor(22, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(45, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
 	}
 	ssd1306_UpdateScreen(dispI2C);
 }

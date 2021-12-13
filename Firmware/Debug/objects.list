@@ -1,6 +1,7 @@
 "./Core/Inc/fonts.o"
 "./Core/Src/Battery.o"
 "./Core/Src/Display.o"
+"./Core/Src/Global.o"
 "./Core/Src/Menu.o"
 "./Core/Src/Timecode.o"
 "./Core/Src/main.o"

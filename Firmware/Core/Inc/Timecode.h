@@ -1,7 +1,7 @@
 #ifndef __TIMECODE_H
 #define __TIMECODE_H
+#include <stdint.h>
 
-#else
 bool initTimecode(uint32_t* clockFrame, uint8_t rate);
 bool jamConfirmation();
 bool timecodeBreakout(uint8_t* hour, 

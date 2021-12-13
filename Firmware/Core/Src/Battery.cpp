@@ -1,5 +1,5 @@
 #include "Battery.h"
-#include "main.h"
+#include "Global.h"
 #include "stm32l4xx_hal.h"
 
 float batteryRead()

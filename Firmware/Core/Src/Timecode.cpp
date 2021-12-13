@@ -1,5 +1,5 @@
 #include "Timecode.h"
-#include "main.h"
+#include "Global.h"
 /* Timecode based functions */
 
 /* Init Timecode
@@ -56,6 +56,7 @@ bool resetTimecode(){
     HAL_TIM_Base_Stop_IT(countTIM);
     HAL_TIM_Base_Stop_IT(outTIM);
     HAL_TIM_IC_Start_IT(inTIM, TIM_CHANNEL_3);
+    tcJammed = false;
     //timer2 input yes
     //timer6 output no
 }

@@ -1,10 +1,10 @@
 #ifndef __MENU_H
 #define __MENU_H
+#include <stdint.h>
 
 
 
 
-#else
 void menuLoop();
 void setAutoOff();
 void rateAlert();
