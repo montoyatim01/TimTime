@@ -23,9 +23,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 extern "C" {
-#include "fonts.h"
-#include "ssd1306.h"
+
 }
+#include "Display.h"
 #define EEPROM_ADDRESS	0xA0
 /* USER CODE END Includes */
 
@@ -62,14 +62,14 @@ PCD_HandleTypeDef hpcd_USB_FS;
 //void setDigit(int addr, int digit, uint8_t value, bool dp);
 //void spiTransfer(int addr, volatile uint8_t opcode, volatile uint8_t data);
 //void transposeData(int addr);
-//void shiftRight(uint8_t theArray[], uint8_t theArraySize);
+void shiftRight(uint8_t theArray[], uint8_t theArraySize);
 void initTimecode();
-//void clearBuffer(uint8_t theArray[], uint8_t theArraySize);
+void clearBuffer(uint8_t theArray[], uint8_t theArraySize);
 void writeTimecode();
 //void updateDisplay(bool on);
-void calibrate();
+//void calibrate();
 //void JumpToBootloader(void);
-void updateDisplay(uint8_t state);
+//void updateDisplay(uint8_t state);
 
 //void write_eeprom_reg(uint16_t reg_addr, uint8_t value);
 //uint8_t  read_eeprom_reg(uint16_t addr);
@@ -93,20 +93,47 @@ static void MX_USB_PCD_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int Offset, hr, mn, sc, fr,setA,setB;
+
+/*Global Variables*/
+uint8_t tc[10] = {0};  // ISR Buffer to store incoming bits
+volatile uint8_t tcIN[8] = {0};         // Buffer to store valid TC data - sync bytes
+volatile bool tcJammed = false;
+uint8_t frameRate = 0;	//Global frame rate change
+
 volatile uint32_t clockFrame = 0;
+
+uint8_t intOffset = 0;
+
+uint8_t autoOff = 0;
+uint16_t autoOffMinutes = 60;
+uint16_t uptimeMinutes = 0;
+float batteryRemaining = 0.0;
+
+uint8_t hr, mn, sc, fr = 0;
+
+bool stat1, stat2;
+bool buttonsHeld = false;
+
+int32_t calibrationArray[6] = {0};
+uint32_t calibrationInterval[6] = {240000,240000,250000,300000,300000,300000};
+uint8_t frameRateDivisor[6] = {24,24,25,30,30,30};
+uint16_t frameRateARR[6] = {50049,49999,47999,40039,40039,39999};
+
+
+ADC_HandleTypeDef *battADC = &hadc1;
+I2C_HandleTypeDef *dispI2C = &hi2c2;
+I2C_HandleTypeDef *memI2C=  &hi2c1;
+TIM_HandleTypeDef *inTIM = &htim2;
+TIM_HandleTypeDef *outTIM = &htim16;
+TIM_HandleTypeDef *countTIM = &htim7;
+
+
+//int Offset, hr, mn, sc, fr,setA,setB;
+//volatile uint32_t clockFrame = 0;
 uint32_t clockFrameOutput = 0;
-uint32_t clockFramePrevious = 0;
+//uint32_t clockFramePrevious = 0;
 volatile uint8_t jamCount = 0;
-volatile bool jamEnable = true;
-volatile bool jammed = false;
 
-volatile uint32_t millis = 0;
-
-uint8_t spidata[16];
-uint8_t status[64];
-uint8_t statusTransposed[64];
-uint8_t buf[2];
 bool anodeMode = true;
 
 const uint16_t sync = 0xBFFC; // Sync word to expect when running tape forward
@@ -119,9 +146,6 @@ enum flagBits {
   tcHalfOne       // ISR is reading a 1 bit so ignore next edge (Internal to ISR)
 };
 
-
-uint8_t tc[10] = {0};                                     // ISR Buffer to store incoming bits
-volatile uint8_t xtc[8] = {0};                            // Buffer to store valid TC data - sync bytes
 volatile uint8_t tcFlags = 0;                             // Various flags used by ISR and main code
 uint32_t uSeconds;                                        // ISR store of last edge change time
 
@@ -131,12 +155,12 @@ volatile bool tcTimer = true;
 volatile uint32_t edgeTimeDiff;
 uint8_t tcWrite[10];
 uint8_t tcWriteBuf[10];
-const char* foo = "0123456789";
-char tcDisplay[11];
-char dispOffset[3];
-uint32_t buttonTime;
 
-uint32_t displayTimeout;
+//char tcDisplay[11];
+char dispOffset[3];
+//uint32_t buttonTime;
+
+uint32_t displayTimeout = 0;
 int prevOffset;
 bool displayOn;
 
@@ -160,8 +184,8 @@ float battStatus;
 char battDisp[5];
 int battPrint;
 
-bool stat1;
-bool stat2;
+//bool stat1;
+//bool stat2;
 
 uint8_t ledCount = 0;
 volatile bool blink = false;
@@ -170,15 +194,15 @@ volatile uint16_t compensationCounter = 0;
 volatile bool compensate = false;
 
 //Lockit Prototype #2
-const uint32_t calibrationAInterval = 240000;
-int32_t calibrationA;
+//const uint32_t calibrationAInterval = 240000;
+//int32_t calibrationA;
 //const uint32_t calibration = 23999963;
-const uint32_t calibration = 23999979;
+//const uint32_t calibration = 23999979; //timtime1
 
-int32_t calibrationArray[6];
+//int32_t calibrationArray[6];
 //calibrationArray[frameRate]
 
-const uint32_t calibrationInterval[6] = {240000,240000,250000,300000,300000,300000};
+//const uint32_t calibrationInterval[6] = {240000,240000,250000,300000,300000,300000};
 //calibrationInterval[frameRate]
 
 /*
@@ -189,7 +213,7 @@ const uint32_t calibrationInterval[6] = {240000,240000,250000,300000,300000,3000
  * const uint8_t calibrationB = -43;
  */
 
-uint8_t frameRate = 0;	//Global frame rate change
+
 /*
  * 0 = 23.976
  * 1 = 24
@@ -197,15 +221,14 @@ uint8_t frameRate = 0;	//Global frame rate change
  * 3 = 29.97
  * 4 = 30
  */
-uint8_t frRDv[6] = {24,24,25,30,30,30};	//Frame rate divisor array
+//uint8_t frRDv[6] = {24,24,25,30,30,30};	//Frame rate divisor array
 //frRDv[frameRate]
-const uint16_t frARR[6] = {50049,49999,47999,40039,40039,39999};	//Frame rate Timer ARR
+//const uint16_t frARR[6] = {50049,49999,47999,40039,40039,39999};	//Frame rate Timer ARR
 //frARR[frameRate]
 
 
-uint8_t autoOff = 0;
-bool menuItemSelect = false;
-uint8_t menuItem = 0;
+
+
 uint8_t lockCountdown = 0;
 char powerDisplay;
 char lockDisplay;
@@ -252,7 +275,7 @@ int main(void)
   MX_TIM16_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
-  DAC1->DHR12R2 = 2048;
+  DAC1->DHR12R2 = 2048; //Set analog out for TXCO VCO
 calibrate();
   GPIOB -> ODR |= GPIO_PIN_12;  //LED
   //HAL_Delay(1000);
@@ -266,14 +289,12 @@ calibrate();
   //HAL_TIM_Base_Start(&htim7);
   //HAL_TIM_Base_Start_IT(&htim16);
   //HAL_TIM_Base_Start_IT(&htim6);
-    tcWrite[8] = 0b11111100;
-  tcWrite[9] = 0b10111111;
+    tcWrite[8] = 0b11111100;  //Sync pattern
+  tcWrite[9] = 0b10111111;  //Sync pattern
 
 
- if (ssd1306_Init(&hi2c2) != 0) {
-     Error_Handler();
-   }
- updateDisplay(0x01);
+
+ updateDisplay(0x1);
   //HAL_Delay(3000);
 
      /* Clear the WU FLAG */
@@ -283,13 +304,10 @@ calibrate();
   //HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
   //HAL_PWR_EnterSTANDBYMode();
 
-   while (!jammed){
-
-}
 
 //HAL_Delay(1);
 //clockFrame++;
-HAL_TIM_Base_Start_IT(&htim7);		//Throw a microsecond delay in here to align the TC perfectly with the input? Currently off by ~1 bits
+HAL_TIM_Base_Start_IT(&htim7);		//Start the output timer
 //HAL_TIM_Base_Start_IT(&htim16);
   /* USER CODE END 2 */
 
@@ -305,41 +323,41 @@ HAL_TIM_Base_Start_IT(&htim7);		//Throw a microsecond delay in here to align the
     * Timecode output is top priority
     *
     */
-updateDisplay(0x01);
-	      stat1 = GPIOA -> IDR & GPIO_PIN_9;
+updateDisplay(0x1);
+	  stat1 = GPIOA -> IDR & GPIO_PIN_9;
     stat2 = GPIOA -> IDR & GPIO_PIN_10;
 	    //PA4 STat2
 	    //PA5 Stat1
     if (clockFrame == 2073600) clockFrame = 0;
     clockFrameOutput = clockFrame + 1;
-	    tcWrite[0] = ((clockFrameOutput % frRDv[frameRate]) % 10);
-	    tcWrite[0] |= (xtc[7] & 0xF0);
+	    tcWrite[0] = ((clockFrameOutput % frameRateDivisor[frameRate]) % 10);
+	    tcWrite[0] |= (tcIN[7] & 0xF0);
 
-	    tcWrite[1] = (clockFrameOutput % frRDv[frameRate]) / 10;
-	    tcWrite[1] |= (xtc[6] & 0xF0);
+	    tcWrite[1] = (clockFrameOutput % frameRateDivisor[frameRate]) / 10;
+	    tcWrite[1] |= (tcIN[6] & 0xF0);
 
-	    tcWrite[2] = ((clockFrameOutput / frRDv[frameRate]) % 60) % 10;
-	    tcWrite[2] |= (xtc[5] & 0xF0);
+	    tcWrite[2] = ((clockFrameOutput / frameRateDivisor[frameRate]) % 60) % 10;
+	    tcWrite[2] |= (tcIN[5] & 0xF0);
 
-	    tcWrite[3] = ((clockFrameOutput / frRDv[frameRate]) % 60) / 10;
-	    tcWrite[3] |= (xtc[4] & 0xF0);
+	    tcWrite[3] = ((clockFrameOutput / frameRateDivisor[frameRate]) % 60) / 10;
+	    tcWrite[3] |= (tcIN[4] & 0xF0);
 
-	    tcWrite[4] = ((clockFrameOutput / (frRDv[frameRate] * 60)) % 60) % 10;
-	    tcWrite[4] |= (xtc[3] & 0xF0);
+	    tcWrite[4] = ((clockFrameOutput / (frameRateDivisor[frameRate] * 60)) % 60) % 10;
+	    tcWrite[4] |= (tcIN[3] & 0xF0);
 
-	    tcWrite[5] = ((clockFrameOutput / (frRDv[frameRate] * 60)) % 60) / 10;
-	    tcWrite[5] |= (xtc[2] & 0xF0);
+	    tcWrite[5] = ((clockFrameOutput / (frameRateDivisor[frameRate] * 60)) % 60) / 10;
+	    tcWrite[5] |= (tcIN[2] & 0xF0);
 
-	    tcWrite[6] = (clockFrameOutput / (frRDv[frameRate] * 60 * 60)) % 10;
-	    tcWrite[6] |= (xtc[1] & 0xF0);
+	    tcWrite[6] = (clockFrameOutput / (frameRateDivisor[frameRate] * 60 * 60)) % 10;
+	    tcWrite[6] |= (tcIN[1] & 0xF0);
 
-	    tcWrite[7] = (clockFrameOutput / (frRDv[frameRate] * 60 * 60)) / 10;
-	    tcWrite[7] |= (xtc[0] & 0xF0);
+	    tcWrite[7] = (clockFrameOutput / (frameRateDivisor[frameRate] * 60 * 60)) / 10;
+	    tcWrite[7] |= (tcIN[0] & 0xF0);
 
-	    hr = (clockFrameOutput / frRDv[frameRate]) / 3600;
-		mn = ((clockFrameOutput / frRDv[frameRate]) / 60 ) % 60;
-		sc = (clockFrameOutput / frRDv[frameRate]) % 60;
-		fr = clockFrameOutput % frRDv[frameRate];
+	    hr = (clockFrameOutput / frameRateDivisor[frameRate]) / 3600;
+		mn = ((clockFrameOutput / frameRateDivisor[frameRate]) / 60 ) % 60;
+		sc = (clockFrameOutput / frameRateDivisor[frameRate]) % 60;
+		fr = clockFrameOutput % frameRateDivisor[frameRate];
 
 
 	    	    int oneBits = 0;
@@ -916,14 +934,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void calibrate(){ //Find notes on how this works
+/*void calibrate(){ //Find notes on how this works
 	calibrationA = 1201200000 - (int32_t(	(double(calibration)/20.0) * 1001));
 	calibrationArray[0] = 1201200000 - (int32_t(	(double(calibration)/20.0) * 1001));
 	calibrationArray[1] = 1200000000 - (int32_t(	(double(calibration)/20.0) * 1000));
 	calibrationArray[2] = 1200000000 - (int32_t(	(double(calibration)/20.0) * 1000));
 	calibrationArray[3] = 1201200000 - (int32_t(	(double(calibration)/20.0) * 1001));
 	calibrationArray[4] = 1200000000 - (int32_t(	(double(calibration)/20.0) * 1000));
-}
+}*/
 
 
 
@@ -958,7 +976,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     	  {
     	    if (bitRead(tcFlags, tcHalfOne) == 1){                // But we are expecting a 1 edge
     	      bitClear(tcFlags, tcHalfOne);
-    	      clearBuffer(tc, sizeof(tc));
+    	      clearBuffer(tc, sizeof(tc)); //TODO WHAT DOES?
     	      __enable_irq();
     	      return;
     	    }
@@ -991,17 +1009,17 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     	     // __enable_irq();
     	     // return;                                             // Do nothing else
     	    }
-    	    if (jamEnable){
-    	    	for (uint8_t x = 0; x < sizeof(xtc); x++){            // Copy buffer without sync word
-    	    		xtc[x] = tc[x + 2];
+    	    //if (jamEnable){
+    	    	for (uint8_t x = 0; x < sizeof(tcIN); x++){            // Copy buffer without sync word
+    	    		tcIN[x] = tc[x + 2];
     	    	}
-    	    }
+    	    //}
     	    bitSet(tcFlags, tcValid);                             // Signal valid TC
     	    jamCount++;
-    	    if (jamCount > 23 && jamEnable){
-    	    	jamEnable = false;
+    	    if (jamCount > 23){
+    	    	//jamEnable = false;
     	    	jamCount = 0;
-    	    	jammed = true;
+    	    	tcJammed = true;
 initTimecode();
     	    	//HAL_TIM_Base_Stop_IT(&htim16);
     	    //endBit = false;
@@ -1027,16 +1045,24 @@ initTimecode();
 	__enable_irq();
 }
 
-
-
-
-void initTimecode(){
-  int hr = int(xtc[1] & 0x0F) + (int(xtc[0] & 0x03)*10);
-  int mn = int(xtc[3] & 0x0F) + (int(xtc[2] & 0x07)*10);
-  int sc = int(xtc[5] & 0x0F) + (int(xtc[4] & 0x07)*10);
-  int fr = int(xtc[7] & 0x0F) + (int(xtc[6] & 0x03)*10);
-  clockFrame = (hr * 60 * 60 * frRDv[frameRate]) + (mn * 60 * frRDv[frameRate]) + (sc * frRDv[frameRate]) + fr;
+void clearBuffer(uint8_t theArray[], uint8_t theArraySize){
+  for (uint8_t x = 0; x < theArraySize - 1; x++){
+    theArray[x] = 0;
+  }
 }
+
+void shiftRight(uint8_t theArray[], uint8_t theArraySize){
+  uint8_t x;
+  for (x = theArraySize; x > 0; x--){
+    uint8_t xBit = bitRead(theArray[x - 1], 0);
+    theArray[x] = theArray[x] >> 1;
+    theArray[x] = theArray[x] | (xBit << 7);
+  }
+  theArray[x] = theArray[x] >> 1;
+}
+
+
+
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -1122,21 +1148,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  clockFrame++;
 	  if (compensate){    //If coming back from compensation
 		  //reset to proper ARR
-		  __HAL_TIM_SET_AUTORELOAD(&htim7,frARR[frameRate]);
+		  __HAL_TIM_SET_AUTORELOAD(&htim7,frameRateARR[frameRate]);
 		  //TIM7->ARR = 50049;
 		  compensate = false;
 		  compensationCounter = 0;
 	  }
     //If it's time to compensate
 	  if (compensationCounter == calibrationInterval[frameRate]){
-		  __HAL_TIM_SET_AUTORELOAD(&htim7, (frARR[frameRate] + calibrationArray[frameRate]));
+		  __HAL_TIM_SET_AUTORELOAD(&htim7, (frameRateARR[frameRate] + calibrationArray[frameRate]));
 		  compensate = true;
 
 	  }
 compensationCounter++;
 
     //Remove this blinky bit. Put in the main loop
-	  if (clockFrame % frRDv[frameRate] == 0){
+	  if (clockFrame % frameRateDivisor[frameRate] == 0){
 		  blink = true;
 	  } else {
 			  blink = false;
@@ -1147,7 +1173,7 @@ compensationCounter++;
 }
 
 
-
+/*
 void updateDisplay(uint8_t state){
 	switch (state)
 	{
@@ -1403,7 +1429,7 @@ void updateDisplay(uint8_t state){
 		break;
 	}
 }
-
+*/
 uint8_t  read_eeprom_reg(uint16_t addr)
 {
         uint8_t buffer[] = {addr};

@@ -1,4 +1,9 @@
+#ifndef __BATTERY_H
+#define __BATTERY_H
 #include "stm32l4xx_hal.h"
+#include "main.h"
 
-uint16_t readBuffer[8];
-uint8_t bufferPosition = 0;
+#else
+float batteryRead();
+float battPercent(uint16_t analogReading);
+#endif
