@@ -37,6 +37,7 @@ extern "C" {
 #include "Timecode.h"
 #include "Display.h"
 #include "Menu.h"
+#include "ssd1306.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

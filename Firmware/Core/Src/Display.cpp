@@ -1,7 +1,8 @@
 #include "Display.h"
-#include "ssd1306.h"
+
 //#include "fonts.h"
 const char* foo = "0123456789";
+char tcDisplay[11] = {0};
 void updateDisplay(uint8_t state)
 {
 	switch (state)

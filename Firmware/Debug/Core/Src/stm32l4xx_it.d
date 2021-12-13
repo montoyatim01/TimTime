@@ -36,7 +36,8 @@ Core/Src/stm32l4xx_it.o: ../Core/Src/stm32l4xx_it.c ../Core/Inc/main.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim_ex.h \
  ../Core/Inc/Battery.h ../Core/Inc/main.h ../Core/Inc/Timecode.h \
- ../Core/Inc/Display.h ../Core/Inc/Menu.h ../Core/Inc/stm32l4xx_it.h
+ ../Core/Inc/Display.h ../Core/Inc/Menu.h ../Core/Inc/ssd1306.h \
+ ../Core/Inc/fonts.h ../Core/Inc/stm32l4xx_it.h
 
 ../Core/Inc/main.h:
 
@@ -121,5 +122,9 @@ Core/Src/stm32l4xx_it.o: ../Core/Src/stm32l4xx_it.c ../Core/Inc/main.h \
 ../Core/Inc/Display.h:
 
 ../Core/Inc/Menu.h:
+
+../Core/Inc/ssd1306.h:
+
+../Core/Inc/fonts.h:
 
 ../Core/Inc/stm32l4xx_it.h:

@@ -15,7 +15,7 @@ typedef enum{
 } displayMode;
 //typedef enum displayMode displayMode;
 
-extern char tcDisplay[11];
+
 
 #else
 void updateDisplay(uint8_t state);
@@ -30,4 +30,6 @@ void displayConfirmationRejam();
 void displayBattery();
 void timecodeDisplay();
 void initDisplay();
+
+extern char tcDisplay[11];
 #endif
