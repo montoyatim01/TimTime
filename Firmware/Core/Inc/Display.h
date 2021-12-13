@@ -1,8 +1,8 @@
 #ifndef __DISPLAY_H
 #define __DISPLAY_H
 
-#include "main.h"
-#include "Menu.h"
+
+
 typedef enum{
     d_off = 0x0,
     d_home = 0x1,

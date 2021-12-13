@@ -26,6 +26,8 @@ extern "C" {
 
 }
 #include "Display.h"
+#include "Timecode.h"
+#include "Menu.h"
 #define EEPROM_ADDRESS	0xA0
 /* USER CODE END Includes */
 
@@ -307,7 +309,7 @@ calibrate();
 
 //HAL_Delay(1);
 //clockFrame++;
-HAL_TIM_Base_Start_IT(&htim7);		//Start the output timer
+//HAL_TIM_Base_Start_IT(&htim7);		//Start the output timer
 //HAL_TIM_Base_Start_IT(&htim16);
   /* USER CODE END 2 */
 
@@ -324,11 +326,12 @@ HAL_TIM_Base_Start_IT(&htim7);		//Start the output timer
     *
     */
 updateDisplay(0x1);
+frameCheck();
 	  stat1 = GPIOA -> IDR & GPIO_PIN_9;
     stat2 = GPIOA -> IDR & GPIO_PIN_10;
 	    //PA4 STat2
 	    //PA5 Stat1
-    if (clockFrame == 2073600) clockFrame = 0;
+    //if (clockFrame == 2073600) clockFrame = 0;
     clockFrameOutput = clockFrame + 1;
 	    tcWrite[0] = ((clockFrameOutput % frameRateDivisor[frameRate]) % 10);
 	    tcWrite[0] |= (tcIN[7] & 0xF0);
@@ -389,13 +392,42 @@ updateDisplay(0x1);
 	  setDigit(0,0,((clockFrame % frRDv[frameRate]) % 10),false);
 	    }*/
 
-	  if (blink){
+	  if (clockFrame % frameRateDivisor[frameRate] == 0){
 		  (GPIOB->ODR) |= (1UL << (12));
 	  } else {
 			  (GPIOB->ODR) &= ~(1UL << (12));
 	  }
 
+//button handlers
+if(GPIOC -> IDR & GPIO_PIN_13){	//Menu button
+	    	uint32_t menuCount = HAL_GetTick();
+	    	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);
+	    	//if (!lock){
+	    	while (GPIOC -> IDR & GPIO_PIN_13){
+	    		if (HAL_GetTick() - menuCount > 500){
+	    			menuItem = 0;
+	    			//inMenu = true;
+	    			menuItemSelect = false;
+					//menuEnter = true;
+					updateDisplay(d_menu);
+	    			menuLoop();
+					//menuEnter = false;
 
+	    		}
+
+	    			updateDisplay(0x01);
+	    	}
+	    	//} else {
+			   //updateDisplay(0x02);
+			   //displayTimeout = HAL_GetTick();
+			   //displayOn = true;
+		   //}
+
+	    }
+
+
+
+/*
 	  	    HAL_ADC_Start(&hadc1);
     HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
     batt = HAL_ADC_GetValue(&hadc1);
@@ -409,21 +441,21 @@ updateDisplay(0x1);
     battCount = battCount / 32;
     battStatus = (((float)battCount-2120.0) / 500.0);
     if (battStatus < 0.0) battStatus = 0.0;
-    if (battStatus > 1.0) battStatus = 1.0;
+    if (battStatus > 1.0) battStatus = 1.0;*/
 	    //PA7 Battery check pin
 
-    stat1 = GPIOA -> IDR & GPIO_PIN_9;
-    stat2 = GPIOA -> IDR & GPIO_PIN_10;
+    //stat1 = GPIOA -> IDR & GPIO_PIN_9;
+    //stat2 = GPIOA -> IDR & GPIO_PIN_10;
 
-    if(GPIOB -> IDR & GPIO_PIN_8){
+    //if(GPIOB -> IDR & GPIO_PIN_8){
     	     /* Clear the WU FLAG */
-  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+  /*__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
 
 
   HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
   HAL_Delay(500);
  HAL_PWR_EnterSTANDBYMode();
-    }
+    }*/
 	    //PA4 STat2
 	    //PA5 Stat1
 

@@ -1,4 +1,8 @@
 #include "Menu.h"
+#include "main.h"
+#include "Display.h"
+#include "Timecode.h"
+#include "stm32l4xx_hal.h"
 uint32_t buttonTime;
 uint8_t rateAdjust = frameRate;
 uint8_t offsetAdjust = intOffset;
@@ -20,18 +24,18 @@ void menuLoop()
     
 
     displayTimeout = HAL_GetTick();
-    while (GPIOB->IDR & GPIO_PIN_0)
+    while (GPIOC->IDR & GPIO_PIN_13)
     {
         //While still holding down the menu button
     }
     while (inMenu)
     {
-        updateDisplay(d_menu);
+        updateDisplay(2);
         if (HAL_GetTick() - displayTimeout > 10000)
         {
             inMenu = false;
         }
-        if (GPIOB->IDR & GPIO_PIN_1)
+        if (GPIOB->IDR & GPIO_PIN_8)
         { //Plus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -69,7 +73,7 @@ void menuLoop()
             }
         }
 
-        if (GPIOA->IDR & GPIO_PIN_2)
+        if (GPIOB->IDR & GPIO_PIN_9)
         { //Minus button
 
             displayTimeout = HAL_GetTick();
@@ -112,10 +116,10 @@ void menuLoop()
             }
         }
 
-        if (GPIOB->IDR & GPIO_PIN_0)
+        if (GPIOC->IDR & GPIO_PIN_13)
         { //Menu button
 
-            if (!(GPIOB->IDR & GPIO_PIN_1))
+            if (!(GPIOB->IDR & GPIO_PIN_8))
             {
 
                 displayTimeout = HAL_GetTick();
@@ -172,7 +176,7 @@ void menuLoop()
             }
         }
     }
-    updateDisplay(d_off);
+    updateDisplay(0x0);
 }
 
 void setAutoOff()
@@ -201,21 +205,21 @@ void rateAlert()
 {
     bool inLoop = true;
     highlightYes = false;
-    updateDisplay(d_rateWarn);
-    while (GPIOB->IDR & GPIO_PIN_0)
+    updateDisplay(0x5);
+    while (GPIOC->IDR & GPIO_PIN_13)
     {
         //While still holding down the menu button
     }
     while (inLoop)
     {
-        updateDisplay(d_rateWarn);
+        updateDisplay(0x5);
         if (HAL_GetTick() - displayTimeout > 5000)
         {
             highlightYes = false;
             inLoop = false;
         }
 
-        if (GPIOB->IDR & GPIO_PIN_1)
+        if (GPIOB->IDR & GPIO_PIN_8)
         { //Plus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -225,7 +229,7 @@ void rateAlert()
             }
         }
 
-        if (GPIOA->IDR & GPIO_PIN_2)
+        if (GPIOB->IDR & GPIO_PIN_9)
         { //Minus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -235,7 +239,7 @@ void rateAlert()
             }
         }
 
-        if (GPIOB->IDR & GPIO_PIN_0)
+        if (GPIOC->IDR & GPIO_PIN_13)
         { //Menu button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -256,21 +260,21 @@ void rateAlert()
 void offsetAlert()
 {
     bool inLoop = true;
-    updateDisplay(d_offsetWarn);
-    while (GPIOB->IDR & GPIO_PIN_0)
+    updateDisplay(0x6);
+    while (GPIOC->IDR & GPIO_PIN_13)
     {
         //While still holding down the menu button
     }
     while (inLoop)
     {
-        updateDisplay(d_offsetWarn);
+        updateDisplay(0x6);
         if (HAL_GetTick() - displayTimeout > 5000)
         {
             highlightYes = false;
             inLoop = false;
         }
 
-        if (GPIOB->IDR & GPIO_PIN_0)
+        if (GPIOC->IDR & GPIO_PIN_13)
         { //Menu button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -289,21 +293,21 @@ void reJamAlert()
 {
     bool inLoop = true;
     highlightYes = false;
-    updateDisplay(d_rejamWarn);
-    while (GPIOB->IDR & GPIO_PIN_0)
+    updateDisplay(0x7);
+    while (GPIOC->IDR & GPIO_PIN_13)
     {
         //While still holding down the menu button
     }
     while (inLoop)
     {
-        updateDisplay(d_rejamWarn);
+        updateDisplay(0x7);
         if (HAL_GetTick() - displayTimeout > 5000)
         {
             highlightYes = false;
             inLoop = false;
         }
 
-        if (GPIOB->IDR & GPIO_PIN_1)
+        if (GPIOB->IDR & GPIO_PIN_8)
         { //Plus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -313,7 +317,7 @@ void reJamAlert()
             }
         }
 
-        if (GPIOA->IDR & GPIO_PIN_2)
+        if (GPIOB->IDR & GPIO_PIN_9)
         { //Minus button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce
@@ -323,7 +327,7 @@ void reJamAlert()
             }
         }
 
-        if (GPIOB->IDR & GPIO_PIN_0)
+        if (GPIOC->IDR & GPIO_PIN_13)
         { //Menu button
             displayTimeout = HAL_GetTick();
             if (HAL_GetTick() - buttonTime > 350) //Debounce

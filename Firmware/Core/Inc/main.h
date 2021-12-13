@@ -35,8 +35,9 @@ extern "C" {
 #include <stdbool.h>
 #include "Battery.h"
 #include "Timecode.h"
-#include "Display.h"
+
 #include "Menu.h"
+#include "Display.h"
 #include "ssd1306.h"
 /* USER CODE END Includes */
 

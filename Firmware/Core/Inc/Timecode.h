@@ -1,7 +1,5 @@
 #ifndef __TIMECODE_H
 #define __TIMECODE_H
-#include "main.h"
-#include "stm32l4xx_hal.h"
 
 #else
 bool initTimecode(uint32_t* clockFrame, uint8_t rate);
@@ -14,5 +12,5 @@ bool timecodeBreakout(uint8_t* hour,
                         uint8_t rate);
 bool resetTimecode();
 void calibrate();
-void frameCheck(uint32_t* clockFrame);
+void frameCheck();
 #endif

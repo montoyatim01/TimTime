@@ -1,4 +1,6 @@
 #include "Display.h"
+#include "main.h"
+#include "menu.h"
 
 //#include "fonts.h"
 const char* foo = "0123456789";

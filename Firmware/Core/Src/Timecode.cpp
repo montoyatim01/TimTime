@@ -1,4 +1,5 @@
 #include "Timecode.h"
+#include "main.h"
 /* Timecode based functions */
 
 /* Init Timecode
@@ -97,38 +98,38 @@ void calibrate(){
 *
 */
 
-void frameCheck(uint32_t* clockFrame)
+void frameCheck()
 {
   switch(frameRate)
   {
     case 0: //23.98
-      if (*clockFrame == 2073600)
-        *clockFrame = 0;
+      if (clockFrame == 2073600)
+        clockFrame = 0;
       break;
     case 1: //24
-      if (*clockFrame == 2073600)
-        *clockFrame = 0;
+      if (clockFrame == 2073600)
+        clockFrame = 0;
       break;
     case 2: //25
-      if (*clockFrame == 2160000)
-        *clockFrame = 0;
+      if (clockFrame == 2160000)
+        clockFrame = 0;
       break;
     case 3: //29.97
-      if (*clockFrame == 2592000)
-        *clockFrame = 0;
+      if (clockFrame == 2592000)
+        clockFrame = 0;
       break;
     case 4: //29.97 DF
-      if (*clockFrame == 2592000)
-        *clockFrame = 0;
-      if (*clockFrame % 30 == 29 && (*clockFrame / 30) % 60 == 59 && ((((*clockFrame / 30) / 60) % 60)+1) % 10 != 0 )
+      if (clockFrame == 2592000)
+        clockFrame = 0;
+      if (clockFrame % 30 == 29 && (clockFrame / 30) % 60 == 59 && ((((clockFrame / 30) / 60) % 60)+1) % 10 != 0 )
         {
-          *clockFrame++; 
-          *clockFrame++;
+          clockFrame++; 
+          clockFrame++;
         }
       break;
     case 5: //30
-      if (*clockFrame == 2592000)
-        *clockFrame = 0;
+      if (clockFrame == 2592000)
+        clockFrame = 0;
       break;
   }
 }
