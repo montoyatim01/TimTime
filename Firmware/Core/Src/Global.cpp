@@ -7,7 +7,7 @@ uint8_t frameRate = 0;	//Global frame rate change
 
 volatile uint32_t clockFrame = 0;
 
-uint8_t intOffset = 0;
+uint8_t intOffset = 30;
 
 uint8_t autoOff = 0;
 uint16_t autoOffMinutes = 60;

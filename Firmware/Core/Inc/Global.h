@@ -47,6 +47,7 @@ extern uint16_t autoOffMinutes;
 extern uint16_t uptimeMinutes;
 extern float batteryRemaining;
 extern uint8_t rateAdjust;
+extern uint8_t offsetAdjust;
 
 
 #endif

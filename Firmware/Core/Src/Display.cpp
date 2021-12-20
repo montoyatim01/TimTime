@@ -51,17 +51,68 @@ void displayOff()
 void displayMain()
 {
 	//tcbreakout()
+	char offsetStr[3];
 	timecodeDisplay();
 	ssd1306_SetCursor(4, 24);
 	//TODO TC DISPLAY STRING
 	ssd1306_WriteString(tcDisplay, Font_11x18, White);
 
-	ssd1306_SetCursor(4, 6);
-	ssd1306_WriteString("23.98", Font_7x10, White);
+	ssd1306_SetCursor(8, 0);
+	switch (frameRate)
+	{
+	case 0:
+		ssd1306_WriteString("23.98", Font_7x10, White);
+		break;
+	case 1:
+		ssd1306_WriteString("24", Font_7x10, White);
+		break;
+	case 2:
+		ssd1306_WriteString("25", Font_7x10, White);
+		break;
+	case 3:
+		ssd1306_WriteString("29.97", Font_7x10, White);
+		break;
+	case 4:
+		ssd1306_WriteString("29.97 DF", Font_7x10, White);
+		break;
+	case 5:
+		ssd1306_WriteString("30", Font_7x10, White);
+		break;
+	}
 
 	ssd1306_SetCursor(92, 52);
 	ssd1306_WriteString("Menu", Font_7x10, White);
 
+	
+	if (tcJammed)
+	{
+		ssd1306_SetCursor(84, 0);
+		ssd1306_WriteString("Jammed", Font_7x10, White);
+	}
+	else
+	{
+		ssd1306_SetCursor(90, 0);
+		ssd1306_WriteString("Ready", Font_7x10, White);
+	}
+	if (intOffset != 30)
+	{
+		ssd1306_SetCursor(30, 12);
+		if (intOffset > 30)
+		{
+			offsetStr[0] = '+';
+			offsetStr[1] = foo[(intOffset-30)/10];
+			offsetStr[2] = foo[(intOffset-30)%10];
+		}
+		else if (intOffset < 30)
+		{
+			offsetStr[0] = '-';		
+			offsetStr[1] = foo[(30-intOffset)/10];
+			offsetStr[2] = foo[(30-intOffset)%10];
+		}
+		ssd1306_WriteString(offsetStr, Font_7x10, White);
+		ssd1306_SetCursor(48, 12);
+		ssd1306_WriteString(" Offset", Font_7x10, White);
+	}
 	displayBattery();
 	ssd1306_UpdateScreen(dispI2C);
 }
@@ -127,10 +178,14 @@ void displayMenu()
 
 	ssd1306_SetCursor(50, 12);
 	uint8_t dispRate;
+	uint8_t dispOffset;
+	char offsetStr[3];
 	if (menuItemSelect){
 		dispRate = rateAdjust;
+		dispOffset = offsetAdjust;
 	} else {
 		dispRate = frameRate;
+		dispOffset = intOffset;
 	}
 	switch (dispRate)
 	{
@@ -153,8 +208,28 @@ void displayMenu()
 		ssd1306_WriteString("30", Font_7x10, White);
 		break;
 	}
-	ssd1306_SetCursor(75, 22);
+	ssd1306_SetCursor(58, 22);
 	//Insert offset
+	if (dispOffset == 30)
+	{
+		offsetStr[0] = ' ';
+		offsetStr[1] = '0';
+		offsetStr[2] = '0';
+	}
+	else if (dispOffset > 30)
+	{
+		offsetStr[0] = '+';
+		offsetStr[1] = foo[(dispOffset-30)/10];
+		offsetStr[2] = foo[(dispOffset-30)%10];
+	}
+	else if (dispOffset < 30)
+	{
+		offsetStr[0] = '-';		
+		offsetStr[1] = foo[(30-dispOffset)/10];
+		offsetStr[2] = foo[(30-dispOffset)%10];
+	}
+	
+	ssd1306_WriteString(offsetStr, Font_7x10, White); 
 
 	ssd1306_SetCursor(75, 42);
 	switch (autoOff)

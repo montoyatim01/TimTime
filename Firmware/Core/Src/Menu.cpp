@@ -53,9 +53,10 @@ void menuLoop()
                             rateAdjust--;
                         break;
                     case 1: //Offset
-                        offsetAdjust++;
-                        if (offsetAdjust > (frameRateDivisor[frameRate] * 2))
-                            offsetAdjust = (frameRateDivisor[frameRate] * 2);
+                        if (offsetAdjust == 0)
+                            offsetAdjust = 0;
+                        else
+                            offsetAdjust--;
                         break;
                     case 2:
                         break;
@@ -96,12 +97,10 @@ void menuLoop()
                         break;
                         
                     case 1:
-                        if (offsetAdjust == 0)
-                            offsetAdjust = 0;
-                        else
-                            offsetAdjust--;
+                        offsetAdjust++;
+                        if (offsetAdjust > 60)
+                            offsetAdjust = 60;
                         break;
-                        
                     case 2:
                         break;
                     case 3:

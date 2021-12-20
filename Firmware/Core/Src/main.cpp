@@ -1181,7 +1181,6 @@ compensationCounter++;
   }
 }
 
-
 /*
 void updateDisplay(uint8_t state){
 	switch (state)
