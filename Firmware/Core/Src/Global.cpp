@@ -18,12 +18,13 @@ uint8_t hr, mn, sc, fr = 0;
 
 bool stat1, stat2;
 bool buttonsHeld = false;
+uint8_t lockCountdown = 0;
 
 int32_t calibrationArray[6] = {0};
 uint32_t calibrationInterval[6] = {240000,240000,250000,300000,300000,300000};
 uint8_t frameRateDivisor[6] = {24,24,25,30,30,30};
 uint16_t frameRateARR[6] = {50049,49999,47999,40039,40039,39999};
-
+uint8_t powerCountdown = 0;
 
 
 

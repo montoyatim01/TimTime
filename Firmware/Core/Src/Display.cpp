@@ -126,8 +126,8 @@ void displayLocked()
 	if (buttonsHeld)	
 	{
 		ssd1306_SetCursor(60, 32);
-		//lockDisplay = foo[lockCountdown];
-		//ssd1306_WriteChar(lockDisplay, Font_7x10, White);	//TODO Lock Countdown
+		char lockDisplay = foo[lockCountdown];
+		ssd1306_WriteChar(lockDisplay, Font_7x10, White);	//TODO Lock Countdown
 	}
 	else
 	{
@@ -152,8 +152,8 @@ void displayPower()
 	ssd1306_SetCursor(14, 10);
 	ssd1306_WriteString("Power Off", Font_11x18, White);
 	ssd1306_SetCursor(60, 36);
-	//powerDisplay = foo[powerCountdown];
-	//ssd1306_WriteChar(powerDisplay, Font_11x18, White); //TODO Power countdown
+	char powerDisplay = foo[powerCountdown];
+	ssd1306_WriteChar(powerDisplay, Font_11x18, White); //TODO Power countdown
 	ssd1306_UpdateScreen(dispI2C);
 }
 

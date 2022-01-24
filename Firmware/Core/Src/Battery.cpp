@@ -14,6 +14,7 @@ float batteryRead()
         readBuffer[i] = HAL_ADC_GetValue(battADC);
         averageReading += readBuffer[i];
     }
+    batteryRemaining = (battPercent((averageReading / 8)));
     return (battPercent((averageReading / 8)));
     
     

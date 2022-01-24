@@ -123,7 +123,7 @@ void menuLoop()
 
         if (GPIOC->IDR & GPIO_PIN_13)
         { //Menu button
-
+            displayTimeout = HAL_GetTick();
             if (!(GPIOB->IDR & GPIO_PIN_8))
             {
 

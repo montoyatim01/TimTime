@@ -25,6 +25,7 @@ void displayMenu();
 void displayConfirmationRateChange();
 void displayConfirmationOffsetChange();
 void displayConfirmationRejam();
+void displayUnlock();
 void displayBattery();
 void timecodeDisplay();
 void initDisplay();
