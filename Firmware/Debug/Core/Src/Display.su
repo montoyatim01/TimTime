@@ -4,9 +4,9 @@ Display.cpp:51:6:void displayMain()	16	static
 Display.cpp:120:6:void displayLocked()	16	static
 Display.cpp:149:6:void displayPower()	16	static
 Display.cpp:160:6:void displayMenu()	16	static
-Display.cpp:318:6:void displayConfirmationRateChange()	8	static
-Display.cpp:348:6:void displayConfirmationOffsetChange()	8	static
-Display.cpp:371:6:void displayConfirmationRejam()	8	static
-Display.cpp:401:6:void displayBattery()	16	static
-Display.cpp:429:6:void timecodeDisplay()	4	static
-Display.cpp:443:6:void initDisplay()	8	static
+Display.cpp:320:6:void displayConfirmationRateChange()	8	static
+Display.cpp:350:6:void displayConfirmationOffsetChange()	8	static
+Display.cpp:373:6:void displayConfirmationRejam()	8	static
+Display.cpp:403:6:void displayBattery()	16	static
+Display.cpp:431:6:void timecodeDisplay()	4	static
+Display.cpp:445:6:void initDisplay()	8	static

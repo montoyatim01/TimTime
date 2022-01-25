@@ -221,6 +221,17 @@ char powerDisplay;
 char lockDisplay;
 void mcStop();
 
+bool upButton;
+uint32_t upButtonTime;
+
+bool downButton;
+uint32_t downButtonTime;
+
+bool menuButton;
+uint32_t menuButtonTime;
+
+uint32_t batteryCheck;
+
 
 /* USER CODE END 0 */
 
@@ -287,9 +298,11 @@ if(GPIOA -> IDR & GPIO_PIN_0){  //Power button
   }
 }
 
+
+
 if (powerUpMode == 0){
 HAL_Delay(500);
-__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+
     HAL_PWR_EnterSTANDBYMode();
 }
 
@@ -301,7 +314,6 @@ else if (powerUpMode == 2){
 else {
 
 }
-
 HAL_Delay(250);
 calibrate();
     //LED
@@ -325,8 +337,10 @@ calibrate();
 initDisplay();
  updateDisplay(0x1);
  displayTimer = HAL_GetTick();
+ batteryCheck = HAL_GetTick();
  batteryRead();
- 
+ batteryCheck = batteryCheck - 29900;
+batteryRead();
   //HAL_Delay(3000);
 
      /* Clear the WU FLAG */
@@ -355,9 +369,12 @@ initDisplay();
     * Timecode output is top priority
     *
     */
-
+if (HAL_GetTick() - batteryCheck > 30000){
+  batteryCheck = HAL_GetTick();
+  batteryRead();
+}
    if (!isLocked && displayOn){
-     if (HAL_GetTick() - displayTimer > 10000){
+     if (HAL_GetTick() - displayTimer > 5000){
        isLocked = true;
        displayOn = false;
        updateDisplay(0x0);
@@ -439,7 +456,7 @@ frameCheck();
 //button handlers
 if(GPIOC -> IDR & GPIO_PIN_13){	//Menu button
 //TODO Block entering menu when locked
-displayTimer = HAL_GetTick();
+/*displayTimer = HAL_GetTick();
 	    	uint32_t menuCount = HAL_GetTick();
 	    	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);
 	    	if (!isLocked){
@@ -462,20 +479,48 @@ displayTimer = HAL_GetTick();
     else {
       displayTimer = HAL_GetTick();
 displayOn = true;
-    }
+    }*/
+    displayTimer = HAL_GetTick();
+displayOn = true;
+menuButton = true;
+if(HAL_GetTick() - menuButtonTime > 1000 && !isLocked){
+  menuItem = 0;
+  menuItemSelect = false;
+  updateDisplay(d_menu);
+  menuLoop();
+  displayTimer = HAL_GetTick();
+  updateDisplay(0x1);
+  menuButtonTime = HAL_GetTick();
+
+}
 	    }
+      else {
+        menuButton = false;
+        menuButtonTime = HAL_GetTick();
+      }
 
 if(GPIOB -> IDR & GPIO_PIN_8){	//Up button
 displayTimer = HAL_GetTick();
 displayOn = true;
-//Add in code to turn on display with button press?
+upButton = true;
+if (HAL_GetTick() - upButtonTime > 2000){
+  //User Bits
+}
 
 	    }
+      else {
+        upButton = false;
+        upButtonTime = HAL_GetTick();
+      }
 if(GPIOB -> IDR & GPIO_PIN_9){	//Down button
 displayTimer = HAL_GetTick();
 displayOn = true;
 
 	    }
+      else{
+        downButton = false;
+        downButtonTime = HAL_GetTick();
+      }
 
 if(GPIOA -> IDR & GPIO_PIN_0){  //Power button
   if (!isLocked){
@@ -506,7 +551,13 @@ if(powerOff){
 }
 
 if(isLocked && GPIOB -> IDR & GPIO_PIN_9 && GPIOB -> IDR & GPIO_PIN_8){//Both
-  lockTimer = HAL_GetTick();
+  if (!upButton && !downButton){
+  
+  }
+  upButton = true;
+  downButton = true;
+  buttonsHeld = true;
+  /*
 	    	while (isLocked && GPIOB -> IDR & GPIO_PIN_9 && GPIOB -> IDR & GPIO_PIN_8){
 	    		updateDisplay(0x03);
           buttonsHeld = true;
@@ -524,8 +575,26 @@ if(isLocked && GPIOB -> IDR & GPIO_PIN_9 && GPIOB -> IDR & GPIO_PIN_8){//Both
 	    	while (!isLocked && (GPIOB -> IDR & GPIO_PIN_9 || GPIOB -> IDR & GPIO_PIN_8)){
 	    		updateDisplay(0x01);
 	    		displayTimer = HAL_GetTick();
-	    	}
+	    	}*/
+        lockCountdown = 3 - ((HAL_GetTick() - lockTimer)/1000);
+        updateDisplay(0x03);
+        if(HAL_GetTick() - upButtonTime > 3000 && HAL_GetTick() - downButtonTime > 3000){
+          isLocked = false;
+	    			displayTimer = HAL_GetTick();
+            buttonsHeld = false;
+            uptimeMinutes = 0;
+          updateDisplay(0x0);
+        }
+
+        
+
 }
+else {
+  buttonsHeld = false;
+  lockTimer = HAL_GetTick();
+}
+
+
 
     /* USER CODE END WHILE */
 

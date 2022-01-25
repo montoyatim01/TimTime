@@ -229,7 +229,9 @@ void displayMenu()
 		offsetStr[2] = foo[(30-dispOffset)%10];
 	}
 	
-	ssd1306_WriteString(offsetStr, Font_7x10, White); 
+	ssd1306_WriteString(offsetStr, Font_7x10, White);
+	ssd1306_SetCursor(78,22);
+	ssd1306_WriteString("     ", Font_7x10, White); 
 
 	ssd1306_SetCursor(75, 42);
 	switch (autoOff)
@@ -401,7 +403,7 @@ void displayConfirmationRejam()
 void displayBattery()
 {
 	char battDisp[4];
-	//ssd1306_DrawBattery(battStatus); //TODO BATTERY
+	ssd1306_DrawBattery(batteryRemaining); //TODO BATTERY
 	ssd1306_SetCursor(34, 52);
 	int battPrint = int(batteryRemaining * 100.0);
 	if (battPrint == 100)
