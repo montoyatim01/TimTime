@@ -9,7 +9,10 @@ typedef enum{
     d_power = 0x4,
     d_rateWarn = 0x5,
     d_offsetWarn = 0x6,
-    d_rejamWarn = 0x7
+    d_rejamWarn = 0x7,
+    d_calibration = 0x8,
+    d_calOK = 0x9,
+    d_calFail = 0x10
 } displayMode;
 //typedef enum displayMode displayMode;
 
@@ -29,6 +32,10 @@ void displayUnlock();
 void displayBattery();
 void timecodeDisplay();
 void initDisplay();
+
+void displayCalibration();
+void displayCalibrationOK();
+void displayCalibrationFail();
 
 extern char tcDisplay[11];
 #endif

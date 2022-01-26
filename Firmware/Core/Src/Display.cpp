@@ -1,6 +1,7 @@
 #include "Display.h"
 #include "Global.h"
 #include "Menu.h"
+#include "Calibration.h"
 extern "C" {
 #include "ssd1306.h"
 }
@@ -36,6 +37,15 @@ void updateDisplay(uint8_t state)
 		break;
 	case d_rejamWarn:
 		displayConfirmationRejam();
+		break;
+	case d_calibration:
+		displayCalibration();
+		break;
+	case d_calOK:
+		displayCalibrationOK();
+		break;
+	case d_calFail:
+		displayCalibrationFail();
 		break;
 	default:
 		break;
@@ -447,5 +457,92 @@ void initDisplay()
 	 if (ssd1306_Init(dispI2C) != 0) {
      Error_Handler();
    }
+}
+
+void displayCalibration(){
+	char calStr[8];
+	calStr[0] = foo[(newCal % 100000000)/10000000];
+	calStr[1] = foo[(newCal % 10000000)/1000000];
+	calStr[2] = foo[(newCal % 1000000)/100000];
+	calStr[3] = foo[(newCal % 100000)/10000];
+	calStr[4] = foo[(newCal % 10000)/1000];
+	calStr[5] = foo[(newCal % 1000)/100];
+	calStr[6] = foo[(newCal % 100)/10];
+	calStr[7] = foo[newCal % 10];
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(24, 0);
+	ssd1306_WriteString("Calibration", Font_7x10, White);
+	ssd1306_SetCursor(10, 12);
+	ssd1306_WriteString("Val:", Font_7x10, White);
+	ssd1306_SetCursor(40, 12);
+	ssd1306_WriteString(calStr, Font_7x10, White);
+	ssd1306_SetCursor(96,12);
+	ssd1306_WriteString("    ",Font_7x10,White);
+	ssd1306_SetCursor(14, 50);
+	ssd1306_WriteString("OK", Font_7x10, White);
+	ssd1306_SetCursor(60, 50);
+	ssd1306_WriteString("Cancel", Font_7x10, White);
+	if (menuItem == 0){
+		if (menuItemSelect){
+			ssd1306_SetCursor(120, 12);
+			ssd1306_WriteString("<", Font_7x10, White);
+		} else {
+			ssd1306_SetCursor(2, 12);
+			ssd1306_WriteString(">", Font_7x10, White);
+		}
+	}
+	if (menuItem == 1)
+	{
+		ssd1306_SetCursor(6, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(28, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
+	}
+	if (menuItem == 2)
+	{
+		ssd1306_SetCursor(52, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(102, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
+	}
+	ssd1306_UpdateScreen(dispI2C);
+
+
+}
+void displayCalibrationOK(){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(24, 0);
+	ssd1306_WriteString("Calibration", Font_7x10, White);
+	ssd1306_SetCursor(38,12);
+	ssd1306_WriteString("Success", Font_7x10, White);
+
+	ssd1306_SetCursor(58,50);
+	ssd1306_WriteString("OK", Font_7x10, White);
+	if (menuItemSelect){
+		ssd1306_SetCursor(50, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(72, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
+	}
+	ssd1306_UpdateScreen(dispI2C);
+
+}
+void displayCalibrationFail(){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(24, 0);
+	ssd1306_WriteString("Calibration", Font_7x10, White);
+	ssd1306_SetCursor(50,12);
+	ssd1306_WriteString("Fail", Font_7x10, White);
+	ssd1306_SetCursor(58,50);
+	ssd1306_WriteString("OK", Font_7x10, White);
+	if (menuItemSelect){
+		ssd1306_SetCursor(50, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(72, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
+	}
+	ssd1306_UpdateScreen(dispI2C);
+
+
 }
 

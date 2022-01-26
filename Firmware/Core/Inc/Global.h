@@ -2,10 +2,11 @@
 #define __GLOBAL_H
 #include <stdint.h>
 #include "stm32l4xx_hal.h"
-#define calibration 23999979
+//#define calibration 23999979
 
 
 //Global variables//
+extern uint32_t calibration;
 extern volatile uint32_t clockFrame;
 extern volatile bool tcJammed;
 

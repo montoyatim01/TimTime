@@ -1,5 +1,6 @@
 "./Core/Inc/fonts.o"
 "./Core/Src/Battery.o"
+"./Core/Src/Calibration.o"
 "./Core/Src/Display.o"
 "./Core/Src/Global.o"
 "./Core/Src/Menu.o"

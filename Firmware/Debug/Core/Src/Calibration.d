@@ -1,4 +1,5 @@
-Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
+Core/Src/Calibration.o: ../Core/Src/Calibration.cpp \
+ ../Core/Inc/Calibration.h ../Core/Inc/Display.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h \
  ../Core/Inc/stm32l4xx_hal_conf.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rcc.h \
@@ -35,10 +36,11 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr_ex.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim_ex.h \
- ../Core/Inc/Global.h ../Core/Inc/Timecode.h ../Core/Inc/Menu.h \
- ../Core/Inc/Display.h ../Core/Inc/Battery.h ../Core/Inc/Calibration.h
+ ../Core/Inc/Global.h ../Core/Inc/Menu.h
 
-../Core/Inc/main.h:
+../Core/Inc/Calibration.h:
+
+../Core/Inc/Display.h:
 
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 
@@ -114,12 +116,4 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 
 ../Core/Inc/Global.h:
 
-../Core/Inc/Timecode.h:
-
 ../Core/Inc/Menu.h:
-
-../Core/Inc/Display.h:
-
-../Core/Inc/Battery.h:
-
-../Core/Inc/Calibration.h:

@@ -28,6 +28,7 @@
 #include "Menu.h"
 #include "Display.h"
 #include "Battery.h"
+#include "Calibration.h"
 #define EEPROM_ADDRESS	0xA0
 /* USER CODE END Includes */
 
@@ -68,6 +69,9 @@ void shiftRight(uint8_t theArray[], uint8_t theArraySize);
 void initTimecode();
 void clearBuffer(uint8_t theArray[], uint8_t theArraySize);
 void writeTimecode();
+bool readEEPROM();
+bool updateEEPROM();
+
 //void updateDisplay(bool on);
 //void calibrate();
 //void JumpToBootloader(void);
@@ -179,6 +183,10 @@ bool displayOn = true;
 bool powerOff = false;
 
 uint8_t powerUpMode = 0;
+
+bool calWrite = true;
+bool calRead = true;
+bool updateWrite = true;
 
 //Lockit Prototype #2
 //const uint32_t calibrationAInterval = 240000;
@@ -314,8 +322,14 @@ else if (powerUpMode == 2){
 else {
 
 }
-HAL_Delay(250);
-calibrate();
+
+
+
+HAL_Delay(20);
+//calWrite = writeCalibration();
+calRead = readEEPROM();
+HAL_Delay(10);
+//calibrate();
     //LED
   //HAL_Delay(1000);
  // GPIOB -> ODR &= ~GPIO_PIN_12;  //LED
@@ -335,6 +349,12 @@ calibrate();
 
 
 initDisplay();
+
+if (GPIOB -> IDR & GPIO_PIN_8 && GPIOB -> IDR & GPIO_PIN_9){
+  //Run Calibration menu
+  calibrationMenu();
+}
+updateDisplay(0x0);
  updateDisplay(0x1);
  displayTimer = HAL_GetTick();
  batteryCheck = HAL_GetTick();
@@ -488,6 +508,7 @@ if(HAL_GetTick() - menuButtonTime > 1000 && !isLocked){
   menuItemSelect = false;
   updateDisplay(d_menu);
   menuLoop();
+  updateWrite = updateEEPROM();
   displayTimer = HAL_GetTick();
   updateDisplay(0x1);
   menuButtonTime = HAL_GetTick();
@@ -1707,6 +1728,76 @@ void write_eeprom_reg(uint16_t reg_addr, uint8_t value)
         Error_Handler();
     } else {
     }
+}
+bool readEEPROM(){
+  bool calibrationReadOK = true;
+  uint8_t readCal[4];
+  if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0001, 1, &frameRate, 1, 1000)!= HAL_OK)	//offset
+{
+	//memOffset = 24;
+	
+}
+HAL_Delay(20);
+if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0002, 1, &intOffset, 1, 1000)!= HAL_OK)	//frame rate
+{
+	//frameRate = 0;
+	
+}
+HAL_Delay(20);
+if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0003, 1, &autoOff, 1, 1000)!= HAL_OK)	//auto off
+{
+	//autoOff = 0;
+	
+}
+HAL_Delay(20);
+for (int i=0; i<4; i++){
+if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0005+i, 1, &readCal[i], 1, 1000)!= HAL_OK)	//auto off
+{
+	calibrationReadOK = false;
+  break;
+}
+HAL_Delay(10);
+}
+
+if (calibrationReadOK){
+calibration = (readCal[0]) | (readCal[1] << 8) | (readCal[2] << 16) | (readCal[3] << 24);
+if (calibration < 23000000 || calibration > 25000000){
+  calibrationReadOK = false;
+}
+}
+
+return calibrationReadOK;
+}
+bool updateEEPROM(){
+bool writeOK = true;
+  //Frame rate
+  //Offset
+  //Timeout
+  //User bits
+
+  //Calibration
+  HAL_Delay(10);
+	if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0001, 1, &frameRate, 1,1000)!= HAL_OK)	//offset
+				{
+						  writeOK = false;
+				}
+				  HAL_Delay(10);
+			  
+			 
+				  if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0002, 1, &intOffset, 1,250)!= HAL_OK)	//framerate
+					  {
+						  writeOK = false;
+					  }
+				  HAL_Delay(10);
+			  
+			  
+				  if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0003, 1, &autoOff, 1,250)!= HAL_OK)	//autooff
+					  {
+						  writeOK = false;
+					  }
+				  HAL_Delay(10);
+return writeOK;
+			  
 }
 
 
