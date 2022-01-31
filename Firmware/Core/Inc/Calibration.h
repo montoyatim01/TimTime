@@ -6,5 +6,6 @@ extern uint32_t newCal;
 void calibrationMenu();
 bool writeCalibration(uint32_t calibrationWrite);
 void calibrationStatus();
+void calReadFail();
 
 #endif

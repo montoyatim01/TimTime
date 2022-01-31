@@ -131,7 +131,7 @@ volatile uint8_t tcFlags = 0;                             // Various flags used 
 uint32_t uSeconds;                                        // ISR store of last edge change time
 
 char timeCode[12];                                        // For example code another buffer to write decoded timecode
-char userBits[12];
+//char userBits[12];
 volatile bool tcTimer = true;
 volatile uint32_t edgeTimeDiff;
 uint8_t tcWrite[10];
@@ -301,14 +301,14 @@ if(GPIOA -> IDR & GPIO_PIN_0){  //Power button
   while (GPIOA -> IDR & GPIO_PIN_0){
     if (HAL_GetTick() - powerupTime > 2000){
       powerUpMode = 1;
-      GPIOB -> ODR |= GPIO_PIN_12;
+      GPIOB -> ODR |= GPIO_PIN_12;    //LED
     }
   }
 }
 
 
 
-if (powerUpMode == 0){
+if (powerUpMode == 0){    //Power button not held long enough
 HAL_Delay(500);
 
     HAL_PWR_EnterSTANDBYMode();
@@ -326,10 +326,10 @@ else {
 
 
 HAL_Delay(20);
-//calWrite = writeCalibration();
 calRead = readEEPROM();
 HAL_Delay(10);
-//calibrate();
+
+//
     //LED
   //HAL_Delay(1000);
  // GPIOB -> ODR &= ~GPIO_PIN_12;  //LED
@@ -338,24 +338,33 @@ HAL_Delay(10);
  // HAL_Delay(1000);
 
   //GPIOA -> ODR |= GPIO_PIN_8; //Power enable
-    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_3); //Input timer
+     //Input timer
   //HAL_TIM_Base_Start(&htim7);
   //HAL_TIM_Base_Start_IT(&htim16);
   //HAL_TIM_Base_Start_IT(&htim6);
-    tcWrite[8] = 0b11111100;  //Sync pattern
+  tcWrite[8] = 0b11111100;  //Sync pattern
   tcWrite[9] = 0b10111111;  //Sync pattern
 
 
 
 
 initDisplay();
+if (!calRead){
+  calReadFail();
+}
 
 if (GPIOB -> IDR & GPIO_PIN_8 && GPIOB -> IDR & GPIO_PIN_9){
   //Run Calibration menu
   calibrationMenu();
+  calMenu = true;
 }
+if (!calRead && !calMenu){
+  calReadFail();
+}
+calibrate();
+HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_3); //Input timer
 updateDisplay(0x0);
- updateDisplay(0x1);
+updateDisplay(0x1);
  displayTimer = HAL_GetTick();
  batteryCheck = HAL_GetTick();
  batteryRead();
@@ -394,7 +403,7 @@ if (HAL_GetTick() - batteryCheck > 30000){
   batteryRead();
 }
    if (!isLocked && displayOn){
-     if (HAL_GetTick() - displayTimer > 5000){
+     if (HAL_GetTick() - displayTimer > 10000){
        isLocked = true;
        displayOn = false;
        updateDisplay(0x0);
@@ -411,7 +420,8 @@ if (HAL_GetTick() - batteryCheck > 30000){
        updateDisplay(0x0);
      }
      if (displayLoopCounter == 120){
-      updateDisplay(0x3);
+      //updateDisplay(0x3);
+      updateDisplay(d_lock);
       displayLoopCounter = 0;
     }
    }
@@ -508,6 +518,8 @@ if(HAL_GetTick() - menuButtonTime > 1000 && !isLocked){
   menuItemSelect = false;
   updateDisplay(d_menu);
   menuLoop();
+  //updateDisplay(d_userBits);
+  //userBitMenu();
   updateWrite = updateEEPROM();
   displayTimer = HAL_GetTick();
   updateDisplay(0x1);
@@ -1763,6 +1775,7 @@ if (calibrationReadOK){
 calibration = (readCal[0]) | (readCal[1] << 8) | (readCal[2] << 16) | (readCal[3] << 24);
 if (calibration < 23000000 || calibration > 25000000){
   calibrationReadOK = false;
+  calibration = 24000000;
 }
 }
 

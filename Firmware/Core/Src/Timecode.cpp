@@ -13,6 +13,9 @@ bool initTimecode(){
   int fr = int(tcIN[7] & 0x0F) + (int(tcIN[6] & 0x03)*10);
   clockFrame = (hr * 60 * 60 * frameRateDivisor[frameRate]) + (mn * 60 * frameRateDivisor[frameRate]) + (sc * frameRateDivisor[frameRate]) + fr;
   //__HAL_TIM_SET_AUTORELOAD(outTIM,frameRateARR[frameRate]);
+  for (int i=0; i<8; i++){
+    userBits[i] = int((tcIN[i] & 0b11110000)>>4);
+  }
   if (intOffset > 30)
   {
     clockFrame += (intOffset - 30);

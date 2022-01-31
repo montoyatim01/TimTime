@@ -7,8 +7,10 @@
 
 //Global variables//
 extern uint32_t calibration;
+extern bool calMenu;
 extern volatile uint32_t clockFrame;
 extern volatile bool tcJammed;
+extern uint8_t userBits[8];
 
 extern uint32_t displayTimeout;
 

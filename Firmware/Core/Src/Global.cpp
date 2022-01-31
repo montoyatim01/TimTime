@@ -1,11 +1,13 @@
 #include "Global.h"
 /*Global Variables*/
 uint32_t calibration = 23999979;
+bool calMenu = false;
 volatile uint8_t tcIN[8] = {0};         // Buffer to store valid TC data - sync bytes
 volatile bool tcJammed = false;
 uint8_t frameRate = 0;	//Global frame rate change
 
 volatile uint32_t clockFrame = 0;
+uint8_t userBits[8] = {0};
 
 uint8_t intOffset = 30;
 

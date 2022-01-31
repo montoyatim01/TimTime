@@ -47,6 +47,12 @@ void updateDisplay(uint8_t state)
 	case d_calFail:
 		displayCalibrationFail();
 		break;
+	case d_calReadFail:
+		displayCalibrationReadFail();
+		break;
+	case d_userBits:
+		displayUserBitsMenu();
+		break;
 	default:
 		break;
 	}
@@ -543,6 +549,169 @@ void displayCalibrationFail(){
 	}
 	ssd1306_UpdateScreen(dispI2C);
 
+
+}
+void displayCalibrationReadFail(){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(0, 0);
+	ssd1306_WriteString("Failed to read", Font_7x10, White);
+	ssd1306_SetCursor(0,12);
+	ssd1306_WriteString("calibration value.", Font_7x10, White);
+	ssd1306_SetCursor(0,24);
+	ssd1306_WriteString("Device will drift", Font_7x10, White);
+	ssd1306_SetCursor(0,36);
+	ssd1306_WriteString("quickly", Font_7x10, White);
+	ssd1306_SetCursor(58,50);
+	ssd1306_WriteString("OK", Font_7x10, White);
+	if (menuItemSelect){
+		ssd1306_SetCursor(50, 50);
+		ssd1306_WriteString(">", Font_7x10, White);
+		ssd1306_SetCursor(72, 50);
+		ssd1306_WriteString("<", Font_7x10, White);
+	}
+	ssd1306_UpdateScreen(dispI2C);
+}
+
+void displayUserBitsMenu(){
+
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(32, 0);
+	ssd1306_WriteString("User Bits", Font_7x10, White);
+	
+	uint8_t startX = 20;
+	ssd1306_SetCursor((16+(8*0)),28);
+	ssd1306_WriteChar(foo[displayUserBits[0]], Font_7x10, White);
+	ssd1306_SetCursor((16+(8*1)),28);
+	ssd1306_WriteChar(foo[displayUserBits[1]], Font_7x10, White);
+	ssd1306_SetCursor((16+(8*2)),28);
+	ssd1306_WriteChar(':', Font_7x10, White);
+
+	ssd1306_SetCursor((16+(8*3)),28);
+	ssd1306_WriteChar(foo[displayUserBits[2]], Font_7x10, White);
+	ssd1306_SetCursor((16+(8*4)),28);
+	ssd1306_WriteChar(foo[displayUserBits[3]], Font_7x10, White);
+	ssd1306_SetCursor((16+(8*5)),28);
+	ssd1306_WriteChar(':', Font_7x10, White);
+
+
+	ssd1306_SetCursor((16+(8*6)),28);
+	ssd1306_WriteChar(foo[displayUserBits[4]], Font_7x10, White);
+	ssd1306_SetCursor((16+(8*7)),28);
+	ssd1306_WriteChar(foo[displayUserBits[5]], Font_7x10, White);
+	ssd1306_SetCursor((16+(8*8)),28);
+	ssd1306_WriteChar(':', Font_7x10, White);
+
+
+	ssd1306_SetCursor((16+(8*9)),28);
+	ssd1306_WriteChar(foo[displayUserBits[6]], Font_7x10, White);
+	ssd1306_SetCursor((16+(8*10)),28);
+	ssd1306_WriteChar(foo[displayUserBits[7]], Font_7x10, White);
+
+	ssd1306_SetCursor(20,50);
+	ssd1306_WriteString("Set", Font_7x10, White);
+
+	ssd1306_SetCursor(64, 50);
+	ssd1306_WriteString("Cancel", Font_7x10, White);
+
+	if (!menuItemSelect){
+	
+	if (menuItem == 0){
+		ssd1306_SetCursor(8,28);
+		ssd1306_WriteChar('>', Font_7x10, White);
+		ssd1306_SetCursor(106, 28);
+		ssd1306_WriteChar('<', Font_7x10, White);
+	}
+	if (menuItem == 1){
+		ssd1306_SetCursor(12, 50);
+		ssd1306_WriteChar('>', Font_7x10, White);
+		ssd1306_SetCursor(40, 50);
+		ssd1306_WriteChar('<', Font_7x10, White);
+	}
+	if (menuItem == 2){
+		ssd1306_SetCursor(56, 50);
+		ssd1306_WriteChar('>', Font_7x10, White);
+		ssd1306_SetCursor(106, 50);
+		ssd1306_WriteChar('<', Font_7x10, White);
+	}
+	} else {
+		switch (menuItem){
+			case 0:
+				ssd1306_SetCursor((16+(8*0)),40);
+				ssd1306_WriteChar('^', Font_7x10, White);
+				break;
+			case 1:
+				ssd1306_SetCursor((16+(8*1)),40);
+				ssd1306_WriteChar('^', Font_7x10, White);
+				break;
+			case 2:
+				ssd1306_SetCursor((16+(8*3)),40);
+				ssd1306_WriteChar('^', Font_7x10, White);
+				break;
+			case 3:
+				ssd1306_SetCursor((16+(8*4)),40);
+				ssd1306_WriteChar('^', Font_7x10, White);
+				break;
+			case 4:
+				ssd1306_SetCursor((16+(8*6)),40);
+				ssd1306_WriteChar('^', Font_7x10, White);
+				break;
+			case 5:
+				ssd1306_SetCursor((16+(8*7)),40);
+				ssd1306_WriteChar('^', Font_7x10, White);
+				break;
+			case 6:
+				ssd1306_SetCursor((16+(8*9)),40);
+				ssd1306_WriteChar('^', Font_7x10, White);
+				break;
+			case 7:
+				ssd1306_SetCursor((16+(8*10)),40);
+				ssd1306_WriteChar('^', Font_7x10, White);
+				break;
+			case 8:
+				ssd1306_SetCursor(8,28);
+				ssd1306_WriteChar('>', Font_7x10, White);
+				break;
+		}
+		if (highlightYes){
+			switch (menuItem){
+			case 0:
+				ssd1306_SetCursor((16+(8*0)),12);
+				ssd1306_WriteChar('v', Font_7x10, White);
+				break;
+			case 1:
+				ssd1306_SetCursor((16+(8*1)),12);
+				ssd1306_WriteChar('v', Font_7x10, White);
+				break;
+			case 2:
+				ssd1306_SetCursor((16+(8*3)),12);
+				ssd1306_WriteChar('v', Font_7x10, White);
+				break;
+			case 3:
+				ssd1306_SetCursor((16+(8*4)),12);
+				ssd1306_WriteChar('v', Font_7x10, White);
+				break;
+			case 4:
+				ssd1306_SetCursor((16+(8*6)),12);
+				ssd1306_WriteChar('v', Font_7x10, White);
+				break;
+			case 5:
+				ssd1306_SetCursor((16+(8*7)),12);
+				ssd1306_WriteChar('v', Font_7x10, White);
+				break;
+			case 6:
+				ssd1306_SetCursor((16+(8*9)),12);
+				ssd1306_WriteChar('v', Font_7x10, White);
+				break;
+			case 7:
+				ssd1306_SetCursor((16+(8*10)),12);
+				ssd1306_WriteChar('v', Font_7x10, White);
+				break;
+		}
+		}
+	}
+
+
+	ssd1306_UpdateScreen(dispI2C);
 
 }
 

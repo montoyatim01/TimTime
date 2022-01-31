@@ -10,9 +10,12 @@ void setAutoOff();
 void rateAlert();
 void offsetAlert();
 void reJamAlert();
+void userBitMenu();
 
 extern bool highlightYes;
 extern bool menuItemSelect;
 extern uint8_t menuItem;
+extern uint8_t displayUserBits[8];
+
 
 #endif

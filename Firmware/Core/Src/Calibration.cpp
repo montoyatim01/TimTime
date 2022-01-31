@@ -182,6 +182,7 @@ for (int i=0; i<4; i++){
 void calibrationStatus(){
     menuItemSelect = false;
     bool inScreen = true;
+    uint32_t dispTimeout = HAL_GetTick();
     if (calibrateSuccess){
         calibration = newCal;
         updateDisplay(d_calOK);
@@ -194,6 +195,12 @@ void calibrationStatus(){
     if (calibrateSuccess){
         while(inScreen){
             updateDisplay(d_calOK);
+            if(HAL_GetTick() - dispTimeout > 5000){
+                menuItemSelect = true;
+                updateDisplay(d_calOK);
+                inScreen = false;
+                break;
+            }
             if (GPIOC->IDR & GPIO_PIN_13) //Menu button
             {
                 menuItemSelect = true;
@@ -207,6 +214,12 @@ void calibrationStatus(){
     else {
         while(inScreen){
             updateDisplay(d_calFail);
+            if(HAL_GetTick() - dispTimeout > 5000){
+                menuItemSelect = true;
+                updateDisplay(d_calFail);
+                inScreen = false;
+                break;
+            }
         if (GPIOC->IDR & GPIO_PIN_13) //Menu button
             {
                 menuItemSelect = true;
@@ -216,4 +229,26 @@ void calibrationStatus(){
         }
         HAL_Delay(500);
     }
+}
+
+void calReadFail(){
+    menuItemSelect = false;
+    bool inScreen = true;
+    uint32_t dispTimeout = HAL_GetTick();
+    while (inScreen){
+        updateDisplay(d_calReadFail);
+        if(HAL_GetTick() - dispTimeout > 10000){
+                menuItemSelect = true;
+                updateDisplay(d_calReadFail);
+                inScreen = false;
+                break;
+            }
+        if (GPIOC->IDR & GPIO_PIN_13) //Menu button
+            {
+                menuItemSelect = true;
+                updateDisplay(d_calReadFail);
+                inScreen = false; 
+            }
+    }
+    HAL_Delay(500);
 }

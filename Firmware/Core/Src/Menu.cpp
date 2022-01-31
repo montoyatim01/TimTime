@@ -10,6 +10,7 @@ uint8_t offsetAdjust;
 bool menuItemSelect = false;
 uint8_t menuItem = 0;
 bool highlightYes = false;
+uint8_t displayUserBits[8] = {0};
 void menuLoop()
 {
     bool inMenu = true;
@@ -361,6 +362,142 @@ void reJamAlert()
                 buttonTime = HAL_GetTick(); //Debounce timer
                 inLoop = false;
             }
+        }
+    }
+}
+
+void userBitMenu(){
+    bool inMenu = true;
+    menuItemSelect = false;
+    highlightYes = false;
+    for (int i=0; i<8; i++){
+        displayUserBits[i] = userBits[i];
+    }
+    displayTimeout = HAL_GetTick();
+    while (GPIOC->IDR & GPIO_PIN_13){
+        //while still holding down the button
+    }
+    while (inMenu){
+        updateDisplay(d_userBits);
+        if (HAL_GetTick() - displayTimeout > 8000){
+            inMenu = false;
+            updateDisplay(d_off);
+        }
+        if (GPIOB->IDR & GPIO_PIN_9){   //Plus button
+            displayTimeout = HAL_GetTick();
+            if (HAL_GetTick() - buttonTime > 350){
+                if (menuItemSelect && highlightYes){ 
+                    //Changing digits
+                    if (displayUserBits[menuItem] == 0){
+                        displayUserBits[menuItem] = 9;
+                    } else {
+                        displayUserBits[menuItem]--;
+                    }
+                }
+                if (menuItemSelect && !highlightYes){
+                    //Changing digit position
+                    if (menuItem == 0){
+                        menuItem = 8;
+                    } else {
+                        menuItem--;
+                    }
+                    
+                }
+                if (!menuItemSelect){
+                    //Cycle through menu
+                    menuItem++;
+                    if (menuItem > 2){
+                        menuItem = 0;
+                    }
+                }
+                buttonTime = HAL_GetTick();
+            }
+
+        }
+        if (GPIOB->IDR & GPIO_PIN_8){   //Minus button
+            displayTimeout = HAL_GetTick();
+            if (HAL_GetTick() - buttonTime > 350){
+                if (menuItemSelect && highlightYes){ 
+                    //Changing digits
+                    displayUserBits[menuItem]++;
+                    if (displayUserBits[menuItem] > 9){
+                        displayUserBits[menuItem] = 0;
+                    }
+                    
+                }
+                if (menuItemSelect && !highlightYes){
+                    //Changing digit position
+                    menuItem++;
+                    if (menuItem > 8){
+                        menuItem = 0;
+                    }
+                    
+                }
+                if (!menuItemSelect){
+                    //Cycle through menu
+                    if (menuItem == 0){
+                        menuItem = 2;
+                    } else {
+                        menuItem--;
+                    }
+                }
+                buttonTime = HAL_GetTick();
+            }
+
+        }
+        if (GPIOC->IDR & GPIO_PIN_13){   //Menu button
+            displayTimeout = HAL_GetTick();
+            if (HAL_GetTick() - buttonTime > 350){
+                if (menuItemSelect && highlightYes){ 
+                    //Changing digits
+                    highlightYes = false;
+                }
+                else if (menuItemSelect && !highlightYes){
+                    //Changing digit position
+                    if (menuItem == 8){
+                        menuItemSelect = false;
+                        highlightYes = false;
+                        menuItem = 0;
+                    }
+                    else {
+                        highlightYes = true;
+                        
+                    }
+                    
+                }
+                else if (!menuItemSelect && !highlightYes){
+                    //Cycle through menu
+                    
+                    if (menuItem == 0){
+                        menuItemSelect = true;
+                    }
+                    if (menuItem == 1){
+                        for (int i=0; i<8; i++){
+                            userBits[i] = displayUserBits[i];
+                        }
+                        inMenu = false;
+                        updateDisplay(0);
+                        updateDisplay(d_home);
+                        while (GPIOC->IDR & GPIO_PIN_13)
+                            {
+                                //While still holding down the menu button
+                            }
+
+                    }
+                    if (menuItem == 2){
+                        //Cancel
+                        inMenu = false;
+                        updateDisplay(0);
+                        updateDisplay(d_home);
+                        while (GPIOC->IDR & GPIO_PIN_13)
+                            {
+                                //While still holding down the menu button
+                            }
+                    }
+                }
+                buttonTime = HAL_GetTick();
+            }
+
         }
     }
 }
