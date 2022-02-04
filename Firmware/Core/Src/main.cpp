@@ -239,6 +239,7 @@ bool menuButton;
 uint32_t menuButtonTime;
 
 uint32_t batteryCheck;
+bool wakeUP;
 
 
 /* USER CODE END 0 */
@@ -295,18 +296,28 @@ int main(void)
 /*if(GPIOA -> IDR & GPIO_PIN_9 || GPIOA -> IDR & GPIO_PIN_10){  //Stat 1 & 2
   powerUpMode = 2;
 }*/
+wakeUP = false;
+wakeUP = __HAL_PWR_GET_FLAG(PWR_FLAG_SB);
+clockFrame++;
 
+if (!wakeUP){
+  powerUpMode = 1;
+  GPIOB -> ODR |= GPIO_PIN_12;    //LED
+  HAL_Delay(500);
+}
 if(GPIOA -> IDR & GPIO_PIN_0){  //Power button
   uint32_t powerupTime = HAL_GetTick();
   while (GPIOA -> IDR & GPIO_PIN_0){
     if (HAL_GetTick() - powerupTime > 2000){
       powerUpMode = 1;
       GPIOB -> ODR |= GPIO_PIN_12;    //LED
+      __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
     }
   }
 }
 
-
+else {}
+//do nothing
 
 if (powerUpMode == 0){    //Power button not held long enough
 HAL_Delay(500);
@@ -349,9 +360,7 @@ HAL_Delay(10);
 
 
 initDisplay();
-if (!calRead){
-  calReadFail();
-}
+
 
 if (GPIOB -> IDR & GPIO_PIN_8 && GPIOB -> IDR & GPIO_PIN_9){
   //Run Calibration menu
@@ -437,28 +446,28 @@ frameCheck();
     //if (clockFrame == 2073600) clockFrame = 0;
     clockFrameOutput = clockFrame + 1;
 	    tcWrite[0] = ((clockFrameOutput % frameRateDivisor[frameRate]) % 10);
-	    tcWrite[0] |= (tcIN[7] & 0xF0);
+	    tcWrite[0] |= (userBits[7] << 4);
 
 	    tcWrite[1] = (clockFrameOutput % frameRateDivisor[frameRate]) / 10;
-	    tcWrite[1] |= (tcIN[6] & 0xF0);
+	    tcWrite[1] |= (userBits[6] << 4);
 
 	    tcWrite[2] = ((clockFrameOutput / frameRateDivisor[frameRate]) % 60) % 10;
-	    tcWrite[2] |= (tcIN[5] & 0xF0);
+	    tcWrite[2] |= (userBits[5] << 4);
 
 	    tcWrite[3] = ((clockFrameOutput / frameRateDivisor[frameRate]) % 60) / 10;
-	    tcWrite[3] |= (tcIN[4] & 0xF0);
+	    tcWrite[3] |= (userBits[4] << 4);
 
 	    tcWrite[4] = ((clockFrameOutput / (frameRateDivisor[frameRate] * 60)) % 60) % 10;
-	    tcWrite[4] |= (tcIN[3] & 0xF0);
+	    tcWrite[4] |= (userBits[3] << 4);
 
 	    tcWrite[5] = ((clockFrameOutput / (frameRateDivisor[frameRate] * 60)) % 60) / 10;
-	    tcWrite[5] |= (tcIN[2] & 0xF0);
+	    tcWrite[5] |= (userBits[2] << 4);
 
 	    tcWrite[6] = (clockFrameOutput / (frameRateDivisor[frameRate] * 60 * 60)) % 10;
-	    tcWrite[6] |= (tcIN[1] & 0xF0);
+	    tcWrite[6] |= (userBits[1] << 4);
 
 	    tcWrite[7] = (clockFrameOutput / (frameRateDivisor[frameRate] * 60 * 60)) / 10;
-	    tcWrite[7] |= (tcIN[0] & 0xF0);
+	    tcWrite[7] |= (userBits[0] << 4);
 
 	    hr = (clockFrameOutput / frameRateDivisor[frameRate]) / 3600;
 		mn = ((clockFrameOutput / frameRateDivisor[frameRate]) / 60 ) % 60;
@@ -466,7 +475,9 @@ frameCheck();
 		fr = clockFrameOutput % frameRateDivisor[frameRate];
 
 
-	    	    int oneBits = 0;
+	    //Determining the correct one bits to ensure
+      //The wave is proper
+      int oneBits = 0;
 	    for (int i=0; i<10; i++){
 	    	for (int b=0; b<8; b++){
 	    		if (bitRead(tcWrite[i],b) == 1){
@@ -1744,26 +1755,34 @@ void write_eeprom_reg(uint16_t reg_addr, uint8_t value)
 bool readEEPROM(){
   bool calibrationReadOK = true;
   uint8_t readCal[4];
-  if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0001, 1, &frameRate, 1, 1000)!= HAL_OK)	//offset
+  uint8_t rateAutoOffRead;
+  /*if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0001, 1, &frameRate, 1, 1000)!= HAL_OK)	//offset
 {
 	//memOffset = 24;
 	
-}
+}*/
 HAL_Delay(20);
 if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0002, 1, &intOffset, 1, 1000)!= HAL_OK)	//frame rate
 {
 	//frameRate = 0;
 	
 }
+if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0001, 1, &rateAutoOffRead, 1, 1000)!= HAL_OK)	//frame rate
+{
+	//frameRate = 0;
+	
+}
 HAL_Delay(20);
-if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0003, 1, &autoOff, 1, 1000)!= HAL_OK)	//auto off
+/*if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0003, 1, &autoOff, 1, 1000)!= HAL_OK)	//auto off
 {
 	//autoOff = 0;
 	
 }
-HAL_Delay(20);
+HAL_Delay(20);*/
+frameRate = rateAutoOffRead & 0x0F;
+autoOff = (rateAutoOffRead & 0xF0) >> 4;
 for (int i=0; i<4; i++){
-if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0005+i, 1, &readCal[i], 1, 1000)!= HAL_OK)	//auto off
+if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0003+i, 1, &readCal[i], 1, 1000)!= HAL_OK)	//auto off
 {
 	calibrationReadOK = false;
   break;
@@ -1783,6 +1802,8 @@ return calibrationReadOK;
 }
 bool updateEEPROM(){
 bool writeOK = true;
+uint8_t rateAutoOffWrite;
+rateAutoOffWrite = (autoOff << 4) + (frameRate);
   //Frame rate
   //Offset
   //Timeout
@@ -1790,7 +1811,12 @@ bool writeOK = true;
 
   //Calibration
   HAL_Delay(10);
-	if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0001, 1, &frameRate, 1,1000)!= HAL_OK)	//offset
+	/*if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0001, 1, &frameRate, 1,1000)!= HAL_OK)	//offset
+				{
+						  writeOK = false;
+				}
+				  HAL_Delay(10);*/
+          if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0001, 1, &rateAutoOffWrite, 1,1000)!= HAL_OK)	//offset
 				{
 						  writeOK = false;
 				}
@@ -1804,11 +1830,11 @@ bool writeOK = true;
 				  HAL_Delay(10);
 			  
 			  
-				  if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0003, 1, &autoOff, 1,250)!= HAL_OK)	//autooff
+				  /*if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0003, 1, &autoOff, 1,250)!= HAL_OK)	//autooff
 					  {
 						  writeOK = false;
 					  }
-				  HAL_Delay(10);
+				  HAL_Delay(10);*/
 return writeOK;
 			  
 }

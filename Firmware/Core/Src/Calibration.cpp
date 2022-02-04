@@ -169,7 +169,7 @@ calWrite[1] = calibrationWrite >> 8;
 calWrite[2] = calibrationWrite >> 16;
 calWrite[3] = calibrationWrite >> 24;
 for (int i=0; i<4; i++){
-	if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0005+i, 1, &calWrite[i], 1,1000)!= HAL_OK)	//offset
+	if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0003+i, 1, &calWrite[i], 1,1000)!= HAL_OK)	//offset
 				{
 						  return false;
 				}
