@@ -1,19 +1,22 @@
-main.cpp:246:5:int main()	24	static
-main.cpp:473:6:void SystemClock_Config()	192	static
-main.cpp:539:13:void MX_ADC1_Init()	32	static
-main.cpp:595:13:void MX_DAC1_Init()	48	static
-main.cpp:636:13:void MX_I2C1_Init()	8	static
-main.cpp:682:13:void MX_I2C2_Init()	8	static
-main.cpp:731:13:void MX_TIM2_Init()	40	static
-main.cpp:779:13:void MX_TIM6_Init()	24	static
-main.cpp:817:13:void MX_TIM7_Init()	24	static
-main.cpp:855:13:void MX_TIM16_Init()	8	static
-main.cpp:887:13:void MX_USB_PCD_Init()	8	static
-main.cpp:920:13:void MX_GPIO_Init()	48	static
-main.cpp:981:6:void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef*)	24	static,ignoring_inline_asm
-main.cpp:1080:6:void clearBuffer(uint8_t*, uint8_t)	24	static
-main.cpp:1086:6:void shiftRight(uint8_t*, uint8_t)	24	static
-main.cpp:1099:6:void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef*)	24	static,ignoring_inline_asm
-main.cpp:1465:10:uint8_t read_eeprom_reg(uint16_t)	32	static
-main.cpp:1502:6:void write_eeprom_reg(uint16_t, uint8_t)	32	static
-main.cpp:1528:6:void Error_Handler()	4	static,ignoring_inline_asm
+main.cpp:251:5:int main()	48	static
+main.cpp:654:6:void SystemClock_Config()	192	static
+main.cpp:720:13:void MX_ADC1_Init()	32	static
+main.cpp:776:13:void MX_DAC1_Init()	48	static
+main.cpp:817:13:void MX_I2C1_Init()	8	static
+main.cpp:863:13:void MX_I2C2_Init()	8	static
+main.cpp:912:13:void MX_TIM2_Init()	40	static
+main.cpp:960:13:void MX_TIM6_Init()	24	static
+main.cpp:998:13:void MX_TIM7_Init()	24	static
+main.cpp:1036:13:void MX_TIM16_Init()	8	static
+main.cpp:1068:13:void MX_USB_PCD_Init()	8	static
+main.cpp:1101:13:void MX_GPIO_Init()	48	static
+main.cpp:1160:6:void mcStop()	32	static
+main.cpp:1218:6:void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef*)	24	static,ignoring_inline_asm
+main.cpp:1317:6:void clearBuffer(uint8_t*, uint8_t)	24	static
+main.cpp:1323:6:void shiftRight(uint8_t*, uint8_t)	24	static
+main.cpp:1336:6:void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef*)	24	static,ignoring_inline_asm
+main.cpp:1700:10:uint8_t read_eeprom_reg(uint16_t)	32	static
+main.cpp:1737:6:void write_eeprom_reg(uint16_t, uint8_t)	32	static
+main.cpp:1755:6:bool readEEPROM()	40	static
+main.cpp:1803:6:bool updateEEPROM()	32	static
+main.cpp:1849:6:void Error_Handler()	4	static,ignoring_inline_asm

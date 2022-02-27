@@ -22,12 +22,13 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-extern "C" {
 
-}
-#include "Display.h"
+#include "Global.h"
 #include "Timecode.h"
 #include "Menu.h"
+#include "Display.h"
+#include "Battery.h"
+#include "Calibration.h"
 #define EEPROM_ADDRESS	0xA0
 /* USER CODE END Includes */
 
@@ -68,6 +69,9 @@ void shiftRight(uint8_t theArray[], uint8_t theArraySize);
 void initTimecode();
 void clearBuffer(uint8_t theArray[], uint8_t theArraySize);
 void writeTimecode();
+bool readEEPROM();
+bool updateEEPROM();
+
 //void updateDisplay(bool on);
 //void calibrate();
 //void JumpToBootloader(void);
@@ -96,32 +100,6 @@ static void MX_USB_PCD_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-/*Global Variables*/
-uint8_t tc[10] = {0};  // ISR Buffer to store incoming bits
-volatile uint8_t tcIN[8] = {0};         // Buffer to store valid TC data - sync bytes
-volatile bool tcJammed = false;
-uint8_t frameRate = 0;	//Global frame rate change
-
-volatile uint32_t clockFrame = 0;
-
-uint8_t intOffset = 0;
-
-uint8_t autoOff = 0;
-uint16_t autoOffMinutes = 60;
-uint16_t uptimeMinutes = 0;
-float batteryRemaining = 0.0;
-
-uint8_t hr, mn, sc, fr = 0;
-
-bool stat1, stat2;
-bool buttonsHeld = false;
-
-int32_t calibrationArray[6] = {0};
-uint32_t calibrationInterval[6] = {240000,240000,250000,300000,300000,300000};
-uint8_t frameRateDivisor[6] = {24,24,25,30,30,30};
-uint16_t frameRateARR[6] = {50049,49999,47999,40039,40039,39999};
-
-
 ADC_HandleTypeDef *battADC = &hadc1;
 I2C_HandleTypeDef *dispI2C = &hi2c2;
 I2C_HandleTypeDef *memI2C=  &hi2c1;
@@ -133,6 +111,7 @@ TIM_HandleTypeDef *countTIM = &htim7;
 //int Offset, hr, mn, sc, fr,setA,setB;
 //volatile uint32_t clockFrame = 0;
 uint32_t clockFrameOutput = 0;
+uint8_t tc[10] = {0}; // ISR Buffer to store incoming bits
 //uint32_t clockFramePrevious = 0;
 volatile uint8_t jamCount = 0;
 
@@ -152,7 +131,7 @@ volatile uint8_t tcFlags = 0;                             // Various flags used 
 uint32_t uSeconds;                                        // ISR store of last edge change time
 
 char timeCode[12];                                        // For example code another buffer to write decoded timecode
-char userBits[12];
+//char userBits[12];
 volatile bool tcTimer = true;
 volatile uint32_t edgeTimeDiff;
 uint8_t tcWrite[10];
@@ -162,9 +141,9 @@ uint8_t tcWriteBuf[10];
 char dispOffset[3];
 //uint32_t buttonTime;
 
-uint32_t displayTimeout = 0;
+
 int prevOffset;
-bool displayOn;
+
 
 
 bool fullBit = false;
@@ -194,6 +173,20 @@ volatile bool blink = false;
 
 volatile uint16_t compensationCounter = 0;
 volatile bool compensate = false;
+
+uint8_t displayLoopCounter = 0;
+uint32_t displayTimer;
+uint32_t lockTimer;
+bool isLocked = false;
+bool displayOn = true;
+
+bool powerOff = false;
+
+uint8_t powerUpMode = 0;
+
+bool calWrite = true;
+bool calRead = true;
+bool updateWrite = true;
 
 //Lockit Prototype #2
 //const uint32_t calibrationAInterval = 240000;
@@ -231,10 +224,22 @@ volatile bool compensate = false;
 
 
 
-uint8_t lockCountdown = 0;
+//uint8_t lockCountdown = 0;
 char powerDisplay;
 char lockDisplay;
+void mcStop();
 
+bool upButton;
+uint32_t upButtonTime;
+
+bool downButton;
+uint32_t downButtonTime;
+
+bool menuButton;
+uint32_t menuButtonTime;
+
+uint32_t batteryCheck;
+bool wakeUP;
 
 
 /* USER CODE END 0 */
@@ -278,8 +283,65 @@ int main(void)
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
   DAC1->DHR12R2 = 2048; //Set analog out for TXCO VCO
-calibrate();
-  GPIOB -> ODR |= GPIO_PIN_12;  //LED
+
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+
+
+/*if(GPIOA -> IDR & GPIO_PIN_9 || GPIOA -> IDR & GPIO_PIN_10){  //Stat 1 & 2
+  powerUpMode = 2;
+}*/
+wakeUP = false;
+wakeUP = __HAL_PWR_GET_FLAG(PWR_FLAG_SB);
+clockFrame++;
+
+if (!wakeUP){
+  powerUpMode = 1;
+  GPIOB -> ODR |= GPIO_PIN_12;    //LED
+  HAL_Delay(500);
+}
+if(GPIOA -> IDR & GPIO_PIN_0){  //Power button
+  uint32_t powerupTime = HAL_GetTick();
+  while (GPIOA -> IDR & GPIO_PIN_0){
+    if (HAL_GetTick() - powerupTime > 2000){
+      powerUpMode = 1;
+      GPIOB -> ODR |= GPIO_PIN_12;    //LED
+      __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+    }
+  }
+}
+
+else {}
+//do nothing
+
+if (powerUpMode == 0){    //Power button not held long enough
+HAL_Delay(500);
+
+    HAL_PWR_EnterSTANDBYMode();
+}
+
+else if (powerUpMode == 2){
+  //Run battery charge
+  //In battery charge, continuously check power button
+}
+
+else {
+
+}
+
+
+
+HAL_Delay(20);
+calRead = readEEPROM();
+HAL_Delay(10);
+
+//
+    //LED
   //HAL_Delay(1000);
  // GPIOB -> ODR &= ~GPIO_PIN_12;  //LED
   //HAL_Delay(1000);
@@ -287,16 +349,36 @@ calibrate();
  // HAL_Delay(1000);
 
   //GPIOA -> ODR |= GPIO_PIN_8; //Power enable
-    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_3);
+     //Input timer
   //HAL_TIM_Base_Start(&htim7);
   //HAL_TIM_Base_Start_IT(&htim16);
   //HAL_TIM_Base_Start_IT(&htim6);
-    tcWrite[8] = 0b11111100;  //Sync pattern
+  tcWrite[8] = 0b11111100;  //Sync pattern
   tcWrite[9] = 0b10111111;  //Sync pattern
 
 
 
- updateDisplay(0x1);
+
+initDisplay();
+
+
+if (GPIOB -> IDR & GPIO_PIN_8 && GPIOB -> IDR & GPIO_PIN_9){
+  //Run Calibration menu
+  calibrationMenu();
+  calMenu = true;
+}
+if (!calRead && !calMenu){
+  calReadFail();
+}
+calibrate();
+HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_3); //Input timer
+updateDisplay(0x0);
+updateDisplay(0x1);
+ displayTimer = HAL_GetTick();
+ batteryCheck = HAL_GetTick();
+ batteryRead();
+ batteryCheck = batteryCheck - 29900;
+batteryRead();
   //HAL_Delay(3000);
 
      /* Clear the WU FLAG */
@@ -325,7 +407,37 @@ calibrate();
     * Timecode output is top priority
     *
     */
-updateDisplay(0x1);
+if (HAL_GetTick() - batteryCheck > 30000){
+  batteryCheck = HAL_GetTick();
+  batteryRead();
+}
+   if (!isLocked && displayOn){
+     if (HAL_GetTick() - displayTimer > 10000){
+       isLocked = true;
+       displayOn = false;
+       updateDisplay(0x0);
+     }
+     if (displayLoopCounter == 120){
+      updateDisplay(0x1);
+      displayLoopCounter = 0;
+    }
+   }
+
+   if (isLocked && displayOn){
+     if (HAL_GetTick() - displayTimer > 5000){
+       displayOn = false;
+       updateDisplay(0x0);
+     }
+     if (displayLoopCounter == 120){
+      //updateDisplay(0x3);
+      updateDisplay(d_lock);
+      displayLoopCounter = 0;
+    }
+   }
+   //Add in code to turn on display with button press?
+
+   
+  displayLoopCounter++;
 frameCheck();
 	  stat1 = GPIOA -> IDR & GPIO_PIN_9;
     stat2 = GPIOA -> IDR & GPIO_PIN_10;
@@ -334,28 +446,28 @@ frameCheck();
     //if (clockFrame == 2073600) clockFrame = 0;
     clockFrameOutput = clockFrame + 1;
 	    tcWrite[0] = ((clockFrameOutput % frameRateDivisor[frameRate]) % 10);
-	    tcWrite[0] |= (tcIN[7] & 0xF0);
+	    tcWrite[0] |= (userBits[7] << 4);
 
 	    tcWrite[1] = (clockFrameOutput % frameRateDivisor[frameRate]) / 10;
-	    tcWrite[1] |= (tcIN[6] & 0xF0);
+	    tcWrite[1] |= (userBits[6] << 4);
 
 	    tcWrite[2] = ((clockFrameOutput / frameRateDivisor[frameRate]) % 60) % 10;
-	    tcWrite[2] |= (tcIN[5] & 0xF0);
+	    tcWrite[2] |= (userBits[5] << 4);
 
 	    tcWrite[3] = ((clockFrameOutput / frameRateDivisor[frameRate]) % 60) / 10;
-	    tcWrite[3] |= (tcIN[4] & 0xF0);
+	    tcWrite[3] |= (userBits[4] << 4);
 
 	    tcWrite[4] = ((clockFrameOutput / (frameRateDivisor[frameRate] * 60)) % 60) % 10;
-	    tcWrite[4] |= (tcIN[3] & 0xF0);
+	    tcWrite[4] |= (userBits[3] << 4);
 
 	    tcWrite[5] = ((clockFrameOutput / (frameRateDivisor[frameRate] * 60)) % 60) / 10;
-	    tcWrite[5] |= (tcIN[2] & 0xF0);
+	    tcWrite[5] |= (userBits[2] << 4);
 
 	    tcWrite[6] = (clockFrameOutput / (frameRateDivisor[frameRate] * 60 * 60)) % 10;
-	    tcWrite[6] |= (tcIN[1] & 0xF0);
+	    tcWrite[6] |= (userBits[1] << 4);
 
 	    tcWrite[7] = (clockFrameOutput / (frameRateDivisor[frameRate] * 60 * 60)) / 10;
-	    tcWrite[7] |= (tcIN[0] & 0xF0);
+	    tcWrite[7] |= (userBits[0] << 4);
 
 	    hr = (clockFrameOutput / frameRateDivisor[frameRate]) / 3600;
 		mn = ((clockFrameOutput / frameRateDivisor[frameRate]) / 60 ) % 60;
@@ -363,7 +475,9 @@ frameCheck();
 		fr = clockFrameOutput % frameRateDivisor[frameRate];
 
 
-	    	    int oneBits = 0;
+	    //Determining the correct one bits to ensure
+      //The wave is proper
+      int oneBits = 0;
 	    for (int i=0; i<10; i++){
 	    	for (int b=0; b<8; b++){
 	    		if (bitRead(tcWrite[i],b) == 1){
@@ -377,32 +491,16 @@ frameCheck();
 	    	((tcWrite[7]) &= ~(1UL << (3)));
 	    }
 
-	   /* if (clockFramePrevious != clockFrame){
-	    	clockFramePrevious = clockFrame;
-	    setDigit(0,1,(clockFrame / (frRDv[frameRate] * 60 * 60)) / 10,false);
-	  setDigit(0,2,(clockFrame / (frRDv[frameRate] * 60 * 60)) % 10,false);
 
-	  setDigit(0,3,((clockFrame / (frRDv[frameRate] * 60)) % 60) / 10,false);
-	  setDigit(0,4,((clockFrame / (frRDv[frameRate] * 60)) % 60) % 10,false);
-
-	  setDigit(0,5,((clockFrame / frRDv[frameRate]) % 60) / 10,false);
-	  setDigit(0,6,((clockFrame / frRDv[frameRate]) % 60) % 10,false);
-
-	  setDigit(0,7,(clockFrame % frRDv[frameRate]) / 10,false);
-	  setDigit(0,0,((clockFrame % frRDv[frameRate]) % 10),false);
-	    }*/
-
-	  if (clockFrame % frameRateDivisor[frameRate] == 0){
-		  (GPIOB->ODR) |= (1UL << (12));
-	  } else {
-			  (GPIOB->ODR) &= ~(1UL << (12));
-	  }
+	  
 
 //button handlers
 if(GPIOC -> IDR & GPIO_PIN_13){	//Menu button
+//TODO Block entering menu when locked
+/*displayTimer = HAL_GetTick();
 	    	uint32_t menuCount = HAL_GetTick();
 	    	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);
-	    	//if (!lock){
+	    	if (!isLocked){
 	    	while (GPIOC -> IDR & GPIO_PIN_13){
 	    		if (HAL_GetTick() - menuCount > 500){
 	    			menuItem = 0;
@@ -411,53 +509,136 @@ if(GPIOC -> IDR & GPIO_PIN_13){	//Menu button
 					//menuEnter = true;
 					updateDisplay(d_menu);
 	    			menuLoop();
+            displayTimer = HAL_GetTick();
+            while (GPIOC -> IDR & GPIO_PIN_13)
+              {updateDisplay(0x1);}//add in TC process?}
 					//menuEnter = false;
-
 	    		}
-
 	    			updateDisplay(0x01);
 	    	}
-	    	//} else {
-			   //updateDisplay(0x02);
-			   //displayTimeout = HAL_GetTick();
-			   //displayOn = true;
-		   //}
+    }
+    else {
+      displayTimer = HAL_GetTick();
+displayOn = true;
+    }*/
+    displayTimer = HAL_GetTick();
+displayOn = true;
+menuButton = true;
+if(HAL_GetTick() - menuButtonTime > 1000 && !isLocked){
+  menuItem = 0;
+  menuItemSelect = false;
+  updateDisplay(d_menu);
+  menuLoop();
+  //updateDisplay(d_userBits);
+  //userBitMenu();
+  updateWrite = updateEEPROM();
+  displayTimer = HAL_GetTick();
+  updateDisplay(0x1);
+  menuButtonTime = HAL_GetTick();
+
+}
+	    }
+      else {
+        menuButton = false;
+        menuButtonTime = HAL_GetTick();
+      }
+
+if(GPIOB -> IDR & GPIO_PIN_8){	//Up button
+displayTimer = HAL_GetTick();
+displayOn = true;
+upButton = true;
+if (HAL_GetTick() - upButtonTime > 2000){
+  //User Bits
+}
 
 	    }
+      else {
+        upButton = false;
+        upButtonTime = HAL_GetTick();
+      }
+if(GPIOB -> IDR & GPIO_PIN_9){	//Down button
+displayTimer = HAL_GetTick();
+displayOn = true;
 
+	    }
+      else{
+        downButton = false;
+        downButtonTime = HAL_GetTick();
+      }
 
+if(GPIOA -> IDR & GPIO_PIN_0){  //Power button
+  if (!isLocked){
+  updateDisplay(0x4);
+  uint32_t currentTime = HAL_GetTick();
+  while (GPIOA -> IDR & GPIO_PIN_0){
+    powerCountdown =3 - ((HAL_GetTick() - currentTime)/1000);
+    if (!powerOff){updateDisplay(0x4);}
+    if (HAL_GetTick() - currentTime > 4000){
+      HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+      powerOff = true;
+      updateDisplay(0x0);
+       /* Clear the WU FLAG */
+  //__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
 
-/*
-	  	    HAL_ADC_Start(&hadc1);
-    HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-    batt = HAL_ADC_GetValue(&hadc1);
-    battAvg[battLoc] = batt;
-    battLoc++;
-    if (battLoc > 31) battLoc = 0;
-    battCount = 0;
-    for (int i = 0; i< 32; i++){
-    	battCount += battAvg[i];
     }
-    battCount = battCount / 32;
-    battStatus = (((float)battCount-2120.0) / 500.0);
-    if (battStatus < 0.0) battStatus = 0.0;
-    if (battStatus > 1.0) battStatus = 1.0;*/
-	    //PA7 Battery check pin
+  }
+}
+  
+}
+if(powerOff){
+    //updateDisplay(0x0);
+    HAL_Delay(2000);
+    __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+    HAL_PWR_EnterSTANDBYMode();
+    powerUpMode = 0;
+    
+}
 
-    //stat1 = GPIOA -> IDR & GPIO_PIN_9;
-    //stat2 = GPIOA -> IDR & GPIO_PIN_10;
+if(isLocked && GPIOB -> IDR & GPIO_PIN_9 && GPIOB -> IDR & GPIO_PIN_8){//Both
+  if (!upButton && !downButton){
+  
+  }
+  upButton = true;
+  downButton = true;
+  buttonsHeld = true;
+  /*
+	    	while (isLocked && GPIOB -> IDR & GPIO_PIN_9 && GPIOB -> IDR & GPIO_PIN_8){
+	    		updateDisplay(0x03);
+          buttonsHeld = true;
+	    		lockCountdown = 3 - ((HAL_GetTick() - lockTimer)/1000);
+	    		if (HAL_GetTick()-lockTimer > 3000){
+	    			isLocked = false;
+	    			displayTimer = HAL_GetTick();
+            buttonsHeld = false;
+            
+					uptimeMinutes = 0;
+          updateDisplay(0x0);
+	    		}
+	    	}
+         buttonsHeld = false;
+	    	while (!isLocked && (GPIOB -> IDR & GPIO_PIN_9 || GPIOB -> IDR & GPIO_PIN_8)){
+	    		updateDisplay(0x01);
+	    		displayTimer = HAL_GetTick();
+	    	}*/
+        lockCountdown = 3 - ((HAL_GetTick() - lockTimer)/1000);
+        updateDisplay(0x03);
+        if(HAL_GetTick() - upButtonTime > 3000 && HAL_GetTick() - downButtonTime > 3000){
+          isLocked = false;
+	    			displayTimer = HAL_GetTick();
+            buttonsHeld = false;
+            uptimeMinutes = 0;
+          updateDisplay(0x0);
+        }
 
-    //if(GPIOB -> IDR & GPIO_PIN_8){
-    	     /* Clear the WU FLAG */
-  /*__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+        
+
+}
+else {
+  buttonsHeld = false;
+  lockTimer = HAL_GetTick();
+}
 
 
-  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
-  HAL_Delay(500);
- HAL_PWR_EnterSTANDBYMode();
-    }*/
-	    //PA4 STat2
-	    //PA5 Stat1
 
     /* USER CODE END WHILE */
 
@@ -976,7 +1157,63 @@ static void MX_GPIO_Init(void)
 }*/
 
 
+void mcStop(){
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  // GPIO Ports Clock Enable 
+//__HAL_RCC_GPIOA_CLK_ENABLE();
 
+//Configure GPIO pin : PA10 
+GPIO_InitStruct.Pin = GPIO_PIN_10;
+GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+//Configure GPIO pin : PA9 
+GPIO_InitStruct = {0};
+GPIO_InitStruct.Pin = GPIO_PIN_9;
+GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+//Configure GPIO pin : PA0 
+GPIO_InitStruct = {0};
+GPIO_InitStruct.Pin = GPIO_PIN_0;
+GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+HAL_NVIC_SetPriority(EXTI9_5_IRQn, 3, 0); 
+HAL_NVIC_SetPriority(EXTI0_IRQn, 3, 0); 
+HAL_NVIC_SetPriority(EXTI15_10_IRQn, 3, 0); 
+ HAL_NVIC_EnableIRQ(EXTI9_5_IRQn); 
+ HAL_NVIC_EnableIRQ(EXTI0_IRQn); 
+ HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); 
+
+HAL_SuspendTick();
+
+
+HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+//HAL_ResumeTick();
+//SystemClock_Config();
+//HAL_ResumeTick();
+//MX_GPIO_Init();
+//HAL_NVIC_SystemReset();
+}
+
+/*void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  powerOff = false;
+  HAL_PWR_EnterSTANDBYMode();
+    SystemClock_Config ();
+	  HAL_ResumeTick();
+    //HAL_NVIC_SystemReset();
+    MX_GPIO_Init();
+    __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+    //updateDisplay(0x1);
+    //powerCountdown = 10;
+    HAL_NVIC_SystemReset();
+  
+}*/
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
@@ -1193,17 +1430,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  }
 compensationCounter++;
 
-    //Remove this blinky bit. Put in the main loop
-	  if (clockFrame % frameRateDivisor[frameRate] == 0){
-		  blink = true;
+    if (clockFrame % frameRateDivisor[frameRate] == 0){
+		  (GPIOB->ODR) |= (1UL << (12));
 	  } else {
-			  blink = false;
+			  (GPIOB->ODR) &= ~(1UL << (12));
 	  }
 
 	  __enable_irq();
   }
 }
-
 
 /*
 void updateDisplay(uint8_t state){
@@ -1516,6 +1751,92 @@ void write_eeprom_reg(uint16_t reg_addr, uint8_t value)
         Error_Handler();
     } else {
     }
+}
+bool readEEPROM(){
+  bool calibrationReadOK = true;
+  uint8_t readCal[4];
+  uint8_t rateAutoOffRead;
+  /*if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0001, 1, &frameRate, 1, 1000)!= HAL_OK)	//offset
+{
+	//memOffset = 24;
+	
+}*/
+HAL_Delay(20);
+if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0002, 1, &intOffset, 1, 1000)!= HAL_OK)	//frame rate
+{
+	//frameRate = 0;
+	
+}
+if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0001, 1, &rateAutoOffRead, 1, 1000)!= HAL_OK)	//frame rate
+{
+	//frameRate = 0;
+	
+}
+HAL_Delay(20);
+/*if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0003, 1, &autoOff, 1, 1000)!= HAL_OK)	//auto off
+{
+	//autoOff = 0;
+	
+}
+HAL_Delay(20);*/
+frameRate = rateAutoOffRead & 0x0F;
+autoOff = (rateAutoOffRead & 0xF0) >> 4;
+for (int i=0; i<4; i++){
+if(HAL_I2C_Mem_Read(memI2C, 0x50<<1, 0x0003+i, 1, &readCal[i], 1, 1000)!= HAL_OK)	//auto off
+{
+	calibrationReadOK = false;
+  break;
+}
+HAL_Delay(10);
+}
+
+if (calibrationReadOK){
+calibration = (readCal[0]) | (readCal[1] << 8) | (readCal[2] << 16) | (readCal[3] << 24);
+if (calibration < 23000000 || calibration > 25000000){
+  calibrationReadOK = false;
+  calibration = 24000000;
+}
+}
+
+return calibrationReadOK;
+}
+bool updateEEPROM(){
+bool writeOK = true;
+uint8_t rateAutoOffWrite;
+rateAutoOffWrite = (autoOff << 4) + (frameRate);
+  //Frame rate
+  //Offset
+  //Timeout
+  //User bits
+
+  //Calibration
+  HAL_Delay(10);
+	/*if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0001, 1, &frameRate, 1,1000)!= HAL_OK)	//offset
+				{
+						  writeOK = false;
+				}
+				  HAL_Delay(10);*/
+          if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0001, 1, &rateAutoOffWrite, 1,1000)!= HAL_OK)	//offset
+				{
+						  writeOK = false;
+				}
+				  HAL_Delay(10);
+			  
+			 
+				  if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0002, 1, &intOffset, 1,250)!= HAL_OK)	//framerate
+					  {
+						  writeOK = false;
+					  }
+				  HAL_Delay(10);
+			  
+			  
+				  /*if(HAL_I2C_Mem_Write(memI2C , 0x50<<1, 0x0003, 1, &autoOff, 1,250)!= HAL_OK)	//autooff
+					  {
+						  writeOK = false;
+					  }
+				  HAL_Delay(10);*/
+return writeOK;
+			  
 }
 
 

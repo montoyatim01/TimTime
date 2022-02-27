@@ -1,7 +1,6 @@
-Menu.cpp:12:6:void menuLoop()	16	static
-Menu.cpp:182:6:void setAutoOff()	4	static
-Menu.cpp:204:6:void rateAlert()	16	static
-Menu.cpp:260:6:void offsetAlert()	16	static
-Menu.cpp:292:6:void reJamAlert()	16	static
-Menu.cpp:345:1:void __static_initialization_and_destruction_0(int, int)	16	static
-Menu.cpp:345:1:cpp)	8	static
+Menu.cpp:14:6:void menuLoop()	16	static
+Menu.cpp:199:6:void setAutoOff()	4	static
+Menu.cpp:221:6:void rateAlert()	16	static
+Menu.cpp:280:6:void offsetAlert()	16	static
+Menu.cpp:313:6:void reJamAlert()	16	static
+Menu.cpp:369:6:void userBitMenu()	24	static

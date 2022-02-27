@@ -1,5 +1,5 @@
 #include "Battery.h"
-#include "main.h"
+#include "Global.h"
 #include "stm32l4xx_hal.h"
 
 float batteryRead()
@@ -14,6 +14,7 @@ float batteryRead()
         readBuffer[i] = HAL_ADC_GetValue(battADC);
         averageReading += readBuffer[i];
     }
+    batteryRemaining = (battPercent((averageReading / 8)));
     return (battPercent((averageReading / 8)));
     
     

@@ -1,5 +1,5 @@
 #include "Timecode.h"
-#include "main.h"
+#include "Global.h"
 /* Timecode based functions */
 
 /* Init Timecode
@@ -12,9 +12,25 @@ bool initTimecode(){
   int sc = int(tcIN[5] & 0x0F) + (int(tcIN[4] & 0x07)*10);
   int fr = int(tcIN[7] & 0x0F) + (int(tcIN[6] & 0x03)*10);
   clockFrame = (hr * 60 * 60 * frameRateDivisor[frameRate]) + (mn * 60 * frameRateDivisor[frameRate]) + (sc * frameRateDivisor[frameRate]) + fr;
+  //__HAL_TIM_SET_AUTORELOAD(outTIM,frameRateARR[frameRate]);
+  for (int i=0; i<8; i++){
+    userBits[i] = int((tcIN[i] & 0b11110000)>>4);
+  }
+  if (intOffset > 30)
+  {
+    clockFrame += (intOffset - 30);
+  }
+  else if (intOffset < 30)
+  {
+    clockFrame -= (30-intOffset);
+  }
+  countTIM->Instance->ARR = frameRateARR[frameRate];
+  countTIM->Init.Period = frameRateARR[frameRate];
   HAL_TIM_Base_Start_IT(countTIM);
   HAL_TIM_Base_Start_IT(outTIM);
+  tcJammed = true;
 }
+//do{ (outTIM)->Instance->ARR = (frameRateARR[frameRate]); (outTIM)->Init.Period = (frameRateARR[frameRate]); } while(0)
 
 /* Setting stricter limits on the timing of the input signal:
 * Tougher constraints mean more accurate reporting of the
@@ -55,7 +71,11 @@ bool resetTimecode(){
     clockFrame = 0;
     HAL_TIM_Base_Stop_IT(countTIM);
     HAL_TIM_Base_Stop_IT(outTIM);
+    //countTIM->Instance->ARR = frameRateARR[frameRate];
+    //countTIM->Init.Period = frameRateARR[frameRate];
+    //__HAL_TIM_SET_AUTORELOAD(&outTIM,frameRateARR[frameRate]);
     HAL_TIM_IC_Start_IT(inTIM, TIM_CHANNEL_3);
+    tcJammed = false;
     //timer2 input yes
     //timer6 output no
 }
@@ -91,6 +111,9 @@ void calibrate(){
   calibrationArray[4] = 1201200000 - (int32_t(	(double(calibration)/20.0) * 1001));
 	calibrationArray[5] = 1200000000 - (int32_t(	(double(calibration)/20.0) * 1000));
 }
+
+
+
 
 /* Frame Check
 *

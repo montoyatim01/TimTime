@@ -33,12 +33,6 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
-#include "Battery.h"
-#include "Timecode.h"
-
-#include "Menu.h"
-#include "Display.h"
-#include "ssd1306.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -94,7 +88,7 @@ void Error_Handler(void);
 #define BTN_B_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
-#define calibration 23999979
+
 
 #define uMax0 651 // Any time greater than this is to big
 #define uMax1 390 // Midpoint timing between a 1 and 0 bit length
@@ -108,48 +102,6 @@ void Error_Handler(void);
 void SystemClock_Config(void);
 
 
-
-//Global variables//
-extern volatile uint32_t clockFrame;
-extern volatile bool tcJammed;
-
-extern uint32_t displayTimeout;
-
-extern uint8_t frameRate;
-
-extern uint8_t hr, mn, sc, fr;
-
-extern bool buttonsHeld;
-
-extern ADC_HandleTypeDef *battADC;
-extern I2C_HandleTypeDef *dispI2C;
-extern I2C_HandleTypeDef *memI2C;
-extern TIM_HandleTypeDef *inTIM;
-extern TIM_HandleTypeDef *outTIM;
-extern TIM_HandleTypeDef *countTIM;
-
-/*Calibration*/
-extern volatile uint16_t compensationCounter;
-extern volatile bool compensateEnable;
-//const uint32_t calibrationAInterval = 240000;
-//extern int32_t calibrationA;
-extern int32_t calibrationArray[6];
-extern uint32_t calibrationInterval[6];
-extern uint8_t frameRateDivisor[6];
-extern uint16_t frameRateARR[6];
-
-//extern volatile uint8_t tc[10];
-extern volatile uint8_t tcIN[8];
-
-extern uint8_t intOffset;
-
-extern bool stat1;
-extern bool stat2;
-
-extern uint8_t autoOff;
-extern uint16_t autoOffMinutes;
-extern uint16_t uptimeMinutes;
-extern float batteryRemaining;
 
 
 
