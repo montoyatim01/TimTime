@@ -1,2 +1,11 @@
 (fp_lib_table
+  (lib (name "SKPMBHE010")(type "KiCad")(uri "${KIPRJMOD}/Libraries/SKPMBHE010")(options "")(descr ""))
+  (lib (name "SSD1306")(type "KiCad")(uri "${KIPRJMOD}/Libraries/SSD1306")(options "")(descr ""))
+  (lib (name "MCP73834-CNI_MF")(type "KiCad")(uri "${KIPRJMOD}/Libraries/MCP73834-CNI_MF")(options "")(descr ""))
+  (lib (name "LT1761ES5-2")(type "KiCad")(uri "${KIPRJMOD}/Libraries/LT1761ES5-2.8#TRMPBF")(options "")(descr ""))
+  (lib (name "USB4085-GF-A_REVA")(type "KiCad")(uri "${KIPRJMOD}/Libraries/USB4085-GF-A_REVA")(options "")(descr ""))
+  (lib (name "SJ1-3523NG")(type "KiCad")(uri "${KIPRJMOD}/Libraries/SJ1-3523NG")(options "")(descr ""))
+  (lib (name "KSS241GLFS")(type "KiCad")(uri "${KIPRJMOD}/Libraries/KSS241GLFS")(options "")(descr ""))
+  (lib (name "24AA00T_OT")(type "KiCad")(uri "${KIPRJMOD}/Libraries/24AA00T_OT")(options "")(descr ""))
+  (lib (name "7P-25")(type "KiCad")(uri "${KIPRJMOD}/Libraries/7P-25.000MBP-T")(options "")(descr ""))
 )

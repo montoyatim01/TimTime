@@ -1,4 +1,5 @@
 (sym_lib_table
-  (lib (name TimTime-rescue)(type Legacy)(uri ${KIPRJMOD}/TimTime-rescue.lib)(options "")(descr ""))
-  (lib (name LT1761ES5-2.8#TRMPBF)(type Legacy)(uri /home/timothymontoya/Documents/KiCad_Component_Library/LT1761ES5-2.8#TRMPBF/LT1761ES5-2.8#TRMPBF.lib)(options "")(descr ""))
+  (lib (name "TimTime-rescue")(type "Legacy")(uri "${KIPRJMOD}/TimTime-rescue.lib")(options "")(descr ""))
+  (lib (name "SKPMBHE010")(type "Legacy")(uri "${KIPRJMOD}/Libraries/SKPMBHE010/SKPMBHE010.lib")(options "")(descr ""))
+  (lib (name "LT1761ES5-2.8#TRMPBF")(type "Legacy")(uri "${KIPRJMOD}/Libraries/LT1761ES5-2.8#TRMPBF/LT1761ES5-2.8#TRMPBF.lib")(options "")(descr ""))
 )
