@@ -298,7 +298,7 @@ int main(void)
 }*/
 wakeUP = false;
 wakeUP = __HAL_PWR_GET_FLAG(PWR_FLAG_SB);
-clockFrame++;
+//clockFrame++;
 
 if (!wakeUP){
   powerUpMode = 1;
