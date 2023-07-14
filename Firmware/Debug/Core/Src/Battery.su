@@ -1,2 +1,0 @@
-Battery.cpp:5:7:float batteryRead()	32	static
-Battery.cpp:24:7:float battPercent(uint16_t)	16	static
